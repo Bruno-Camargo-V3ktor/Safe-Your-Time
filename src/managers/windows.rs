@@ -36,7 +36,7 @@ impl Manager for WindowsManager {
 
     async fn kill_process(&self, id_process: String) -> anyhow::Result<()> {
         Command::new("taskkill")
-            .args(&["/PID", &id_process, "/F"])
+            .args(["/PID", &id_process, "/F"])
             .stdout(std::process::Stdio::null())
             .status()
             .await?;
