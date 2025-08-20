@@ -44,12 +44,7 @@ impl Manager for WindowsManager {
         Ok(())
     }
 
-    async fn firewall_block(
-        &self,
-        ip_block: String,
-        ip_redirect: String,
-        rule_name: String,
-    ) -> anyhow::Result<()> {
+    async fn firewall_block(&self, ip: String, rule_name: String) -> anyhow::Result<()> {
         todo!()
     }
 

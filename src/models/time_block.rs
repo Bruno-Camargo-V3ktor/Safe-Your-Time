@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct TimeBlock {
     pub durantion: Duration,
+    pub message: Option<String>,
     pub start_time: DateTime<Local>,
     pub end_time: DateTime<Local>,
 

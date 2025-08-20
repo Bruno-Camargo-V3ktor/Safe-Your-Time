@@ -10,12 +10,7 @@ pub trait Manager {
 
     async fn domain_resolve(&self, domain: String) -> String;
 
-    async fn firewall_block(
-        &self,
-        ip_block: String,
-        ip_redirect: String,
-        rule_name: String,
-    ) -> anyhow::Result<()>;
+    async fn firewall_block(&self, ip: String, rule_name: String) -> anyhow::Result<()>;
 
     async fn firewall_allow(&self, ip: String, rule_name: String) -> anyhow::Result<()>;
 
