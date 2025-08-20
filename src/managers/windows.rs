@@ -1,12 +1,12 @@
-use std::process::{self, Command};
+use tokio::process::Command;
 
 use super::Manager;
 
 pub struct WindowsManager {}
 
 impl Manager for WindowsManager {
-    fn monitoring_apps(&self, apps: Vec<String>) {
-        let output = Command::new("tasklist").output().unwrap();
+    async fn monitoring_apps(&self, apps: Vec<String>) {
+        let output = Command::new("tasklist").output().await.unwrap();
         if output.status.success() {
             let stdout = String::from_utf8_lossy(&output.stdout);
 
@@ -23,7 +23,7 @@ impl Manager for WindowsManager {
                     if apps.contains(&app_name) {
                         let pid = parts[1];
                         if let Ok(pid) = pid.parse::<i32>() {
-                            let res = self.kill_process(pid.to_string());
+                            let res = self.kill_process(pid.to_string()).await;
                             if let Err(e) = res {
                                 eprintln!("{e}");
                             }
@@ -34,16 +34,17 @@ impl Manager for WindowsManager {
         }
     }
 
-    fn kill_process(&self, id_process: String) -> anyhow::Result<()> {
+    async fn kill_process(&self, id_process: String) -> anyhow::Result<()> {
         Command::new("taskkill")
             .args(&["/PID", &id_process, "/F"])
-            .stdout(process::Stdio::null())
-            .status()?;
+            .stdout(std::process::Stdio::null())
+            .status()
+            .await?;
 
         Ok(())
     }
 
-    fn firewall_block(
+    async fn firewall_block(
         &self,
         ip_block: String,
         ip_redirect: String,
@@ -52,11 +53,15 @@ impl Manager for WindowsManager {
         todo!()
     }
 
-    fn firewall_allow(&self, ip: String, rule_name: String) -> anyhow::Result<()> {
+    async fn firewall_allow(&self, ip: String, rule_name: String) -> anyhow::Result<()> {
         todo!()
     }
 
-    fn firewall_clean(&self, rule_name: String) -> anyhow::Result<()> {
+    async fn firewall_clean(&self, rule_name: String) -> anyhow::Result<()> {
+        todo!()
+    }
+
+    async fn domain_resolve(&self, domain: String) -> String {
         todo!()
     }
 }

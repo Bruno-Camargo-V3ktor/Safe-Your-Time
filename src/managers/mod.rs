@@ -4,20 +4,22 @@ mod windows;
 
 // Tratis
 pub trait Manager {
-    fn monitoring_apps(&self, apps: Vec<String>);
+    async fn monitoring_apps(&self, apps: Vec<String>);
 
-    fn kill_process(&self, id_process: String) -> anyhow::Result<()>;
+    async fn kill_process(&self, id_process: String) -> anyhow::Result<()>;
 
-    fn firewall_block(
+    async fn domain_resolve(&self, domain: String) -> String;
+
+    async fn firewall_block(
         &self,
         ip_block: String,
         ip_redirect: String,
         rule_name: String,
     ) -> anyhow::Result<()>;
 
-    fn firewall_allow(&self, ip: String, rule_name: String) -> anyhow::Result<()>;
+    async fn firewall_allow(&self, ip: String, rule_name: String) -> anyhow::Result<()>;
 
-    fn firewall_clean(&self, rule_name: String) -> anyhow::Result<()>;
+    async fn firewall_clean(&self, rule_name: String) -> anyhow::Result<()>;
 }
 
 #[cfg(target_os = "windows")]
