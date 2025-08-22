@@ -1,10 +1,29 @@
-use managers::{Manager, get_manager};
+use std::time::Duration;
 
+use managers::{get_manager, Manager};
+use tokio::time::sleep;
+
+use crate::communication::{Listener, ListenerSockter};
+
+mod communication;
 mod managers;
 mod models;
 
 #[tokio::main]
 async fn main() {
-    let manager = get_manager();
-    manager.monitoring_apps(vec!["librum".to_string()]).await;
+    let server_handle = tokio::spawn(async move {
+        let listener_serve = ListenerSockter::new();
+        let _ = listener_serve.server("/tmp/sytd.sock").await;
+    });
+
+    let monitoring_apps_handle = tokio::spawn(async move {
+        loop {
+            sleep(Duration::from_millis(5000)).await;
+            get_manager()
+                .monitoring_apps(vec!["librum".to_string()])
+                .await;
+        }
+    });
+
+    let _ = tokio::join!(server_handle, monitoring_apps_handle);
 }

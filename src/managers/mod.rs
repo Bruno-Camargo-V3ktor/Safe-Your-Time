@@ -1,3 +1,4 @@
+#[cfg(target_os = "linux")]
 mod linux;
 mod macos;
 mod windows;
@@ -18,19 +19,19 @@ pub trait Manager {
 }
 
 #[cfg(target_os = "windows")]
-pub fn get_manager() -> impl Manager {
+pub fn get_manager() -> windows::WindowsManager {
     use windows::WindowsManager;
     WindowsManager {}
 }
 
 #[cfg(target_os = "linux")]
-pub fn get_manager() -> impl Manager {
+pub fn get_manager() -> linux::LinuxManager {
     use linux::LinuxManager;
     LinuxManager {}
 }
 
 #[cfg(target_os = "macos")]
-pub fn get_manager() -> impl Manager {
+pub fn get_manager() -> macos::MacOsManager {
     use macos::MacOsManager;
     MacOsManager {}
 }
