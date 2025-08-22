@@ -1,6 +1,6 @@
-use super::Listener;
 use super::commands;
 use super::controller::Controller;
+use super::Listener;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
 pub struct ListenerSockter {
@@ -23,6 +23,7 @@ impl Listener for ListenerSockter {
     async fn server(&self, addr: impl Into<String> + std::marker::Send) -> anyhow::Result<()> {
         use tokio::net::UnixListener;
 
+        let controller = self.get_controller();
         let socket_path = addr.into();
         let _ = tokio::fs::remove_file(socket_path.clone()).await;
 
@@ -35,7 +36,7 @@ impl Listener for ListenerSockter {
             let command = commands::from_bytes(&buf[..n]).await.unwrap();
             let response = controller.process(command).await;
 
-            let _ = socket.write_all(&responses.to_bytes()).await;
+            let _ = socket.write_all(&response.to_bytes()).await;
         }
     }
 
