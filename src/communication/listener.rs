@@ -1,7 +1,7 @@
-use crate::communication::Listener;
-use tokio::io::{AsyncReadExt, AsyncWriteExt};
-
+use super::Listener;
+use super::commands;
 use super::controller::Controller;
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
 pub struct ListenerSockter {
     controller: Controller,
@@ -19,7 +19,7 @@ impl Listener for ListenerSockter {
         &self.controller
     }
 
-    #[cfg(target_os = "linux")]
+    #[cfg(any(target_os = "linux", target_os = "macos"))]
     async fn server(&self, addr: impl Into<String> + std::marker::Send) -> anyhow::Result<()> {
         use tokio::net::UnixListener;
 
@@ -32,10 +32,10 @@ impl Listener for ListenerSockter {
 
             let mut buf = vec![0; 1024];
             let n = socket.read(&mut buf).await.unwrap();
-            let received = String::from_utf8_lossy(&buf[..n]);
-            println!("Recevid: {received}");
+            let command = commands::from_bytes(&buf[..n]).await.unwrap();
+            let response = controller.process(command).await;
 
-            let _ = socket.write_all(b"Hi").await;
+            let _ = socket.write_all(&responses.to_bytes()).await;
         }
     }
 
@@ -43,6 +43,7 @@ impl Listener for ListenerSockter {
     async fn server(&self, _addr: impl Into<String> + std::marker::Send) -> anyhow::Result<()> {
         use tokio::net::windows::named_pipe::ServerOptions;
 
+        let controller = self.get_controller();
         let socket_path = r"\\.\pipe\sytd".to_string();
         let mut listener_local = ServerOptions::new()
             .first_pipe_instance(true)
@@ -54,10 +55,10 @@ impl Listener for ListenerSockter {
             let mut buf = vec![0; 1024];
 
             let n = listener_local.read(&mut buf).await.unwrap();
-            let received = String::from_utf8_lossy(&buf[..n]);
-            println!("Recevid: {received}");
+            let command = commands::from_bytes(&buf[..n]).await.unwrap();
+            let response = controller.process(command).await;
 
-            let _ = listener_local.write_all(b"Hi").await;
+            let _ = listener_local.write_all(&response.to_bytes()).await;
         }
     }
 }
