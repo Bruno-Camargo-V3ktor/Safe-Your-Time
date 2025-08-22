@@ -1,16 +1,24 @@
 use crate::communication::Listener;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
-pub struct ListenerSockter {}
+use super::controller::Controller;
+
+pub struct ListenerSockter {
+    controller: Controller,
+}
 
 impl ListenerSockter {
-    pub fn new() -> Self {
-        Self {}
+    pub fn new(controller: Controller) -> Self {
+        Self { controller }
     }
 }
 
 #[async_trait::async_trait]
 impl Listener for ListenerSockter {
+    fn get_controller(&self) -> &Controller {
+        &self.controller
+    }
+
     #[cfg(target_os = "linux")]
     async fn server(&self, addr: impl Into<String> + std::marker::Send) -> anyhow::Result<()> {
         use tokio::net::UnixListener;

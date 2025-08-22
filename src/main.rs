@@ -12,7 +12,8 @@ mod models;
 #[tokio::main]
 async fn main() {
     let server_handle = tokio::spawn(async move {
-        let listener_serve = ListenerSockter::new();
+        let controller = communication::Controller {};
+        let listener_serve = ListenerSockter::new(controller);
         let _ = listener_serve.server("/tmp/sytd.sock").await;
     });
 
