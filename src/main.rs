@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use managers::{get_manager, Manager};
+use managers::{Manager, get_manager};
 use tokio::time::sleep;
 
 use crate::communication::{Listener, ListenerSockter};
