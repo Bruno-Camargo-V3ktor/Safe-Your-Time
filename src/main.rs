@@ -1,6 +1,9 @@
-use crate::communication::{Listener, ListenerSockter};
+use crate::{
+    communication::{Listener, ListenerSockter},
+    storage::{Storage, SurrealDbStorage},
+};
 use managers::{get_manager, Manager};
-use std::time::Duration;
+use std::{env, time::Duration};
 use tokio::time::sleep;
 
 mod communication;
@@ -10,6 +13,18 @@ mod storage;
 
 #[tokio::main]
 async fn main() {
+    let storage = SurrealDbStorage::new(
+        env::current_exe()
+            .unwrap()
+            .parent()
+            .unwrap()
+            .to_str()
+            .unwrap(),
+        "sytd-ns",
+        "sytd-db",
+    )
+    .await;
+
     let server_handle = tokio::spawn(async move {
         let controller = communication::Controller {};
         let listener_serve = ListenerSockter::new(controller);

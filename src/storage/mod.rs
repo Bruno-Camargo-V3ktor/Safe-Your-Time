@@ -1,7 +1,8 @@
-use anyhow::Result;
+use crate::models::{AppConfig, TimeBlock};
 use chrono::{DateTime, Duration, Local};
 
-use crate::models::{AppConfig, TimeBlock};
+mod surrealdb_storage;
+pub use surrealdb_storage::*;
 
 pub type TimeBlockUpdate = (
     Option<Duration>,
@@ -32,7 +33,7 @@ pub trait Storage {
         user: String,
         name: String,
         time_block: TimeBlock,
-    ) -> anyhow::Result<TimeBlock>;
+    ) -> anyhow::Result<(String, TimeBlock)>;
 
     async fn delete_time_block(&self, user: String, name: String) -> anyhow::Result<()>;
 
@@ -53,7 +54,15 @@ pub trait Storage {
         date: DateTime<Local>,
     ) -> anyhow::Result<Vec<(String, TimeBlock)>>;
 
-    async fn create_config(&self, user: String, config: AppConfig) -> Result<(String, AppConfig)>;
+    async fn create_config(
+        &self,
+        user: String,
+        config: AppConfig,
+    ) -> anyhow::Result<(String, AppConfig)>;
 
-    async fn update_config(&self, user: String, update_args: AppConfigUpdate) -> Result<AppConfig>;
+    async fn update_config(
+        &self,
+        user: String,
+        update_args: AppConfigUpdate,
+    ) -> anyhow::Result<AppConfig>;
 }
