@@ -3,8 +3,9 @@ use crate::{
     storage::SurrealDbStorage,
 };
 use managers::{Manager, get_manager};
-use std::{env, time::Duration};
-use tokio::time::sleep;
+use models::TimeBlock;
+use std::{env, sync::Arc, time::Duration};
+use tokio::{sync::RwLock, time::sleep};
 
 mod communication;
 mod managers;
@@ -13,6 +14,7 @@ mod storage;
 
 #[tokio::main]
 async fn main() {
+    let state_app = Arc::new(RwLock::new((String::new(), Option::<TimeBlock>::None)));
     let storage = SurrealDbStorage::new(
         env::current_exe()
             .unwrap()
@@ -26,8 +28,11 @@ async fn main() {
     .await;
 
     let server_handle = tokio::spawn(async move {
-        let controller = communication::Controller {};
+        let controller =
+            communication::Controller::new(Box::new(storage.clone()), state_app.clone());
+
         let listener_serve = ListenerSockter::new(controller);
+
         let _ = listener_serve.server("/tmp/sytd.sock").await;
     });
 
