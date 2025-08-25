@@ -14,7 +14,10 @@ mod storage;
 
 #[tokio::main]
 async fn main() {
-    let state_app = Arc::new(RwLock::new((String::new(), Option::<TimeBlock>::None)));
+    let state_app = Arc::new(RwLock::new((
+        String::new(),
+        (String::new(), Option::<TimeBlock>::None),
+    )));
     let storage = SurrealDbStorage::new(
         env::current_exe()
             .unwrap()

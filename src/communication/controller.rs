@@ -3,7 +3,8 @@ use crate::{models::TimeBlock, storage::Storage};
 use std::sync::Arc;
 use tokio::sync::RwLock;
 
-type AppState = Arc<RwLock<(String, Option<TimeBlock>)>>;
+/// username, id, timeblock
+type AppState = Arc<RwLock<(String, (String, Option<TimeBlock>))>>;
 
 pub struct Controller {
     storage: Box<dyn Storage + Send + Sync>,
