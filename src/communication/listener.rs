@@ -1,6 +1,6 @@
+use super::Listener;
 use super::commands;
 use super::controller::Controller;
-use super::Listener;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
 pub struct ListenerSockter {
@@ -44,22 +44,23 @@ impl Listener for ListenerSockter {
     async fn server(&self, _addr: impl Into<String> + std::marker::Send) -> anyhow::Result<()> {
         use tokio::net::windows::named_pipe::ServerOptions;
 
-        let controller = self.get_controller();
         let socket_path = r"\\.\pipe\sytd".to_string();
-        let mut listener_local = ServerOptions::new()
-            .first_pipe_instance(true)
-            .create(socket_path.clone())
-            .unwrap();
+        let controller = self.get_controller();
 
         loop {
-            let _ = listener_local.connect().await.unwrap();
+            let mut pipe = ServerOptions::new()
+                .first_pipe_instance(false)
+                .create(&socket_path)
+                .unwrap();
+
+            pipe.connect().await.unwrap();
+
             let mut buf = vec![0; 1024];
-
-            let n = listener_local.read(&mut buf).await.unwrap();
-            let command = commands::from_bytes(&buf[..n]).await.unwrap();
-            let response = controller.process(command).await;
-
-            let _ = listener_local.write_all(&response.to_bytes()).await;
+            if let Ok(n) = pipe.read(&mut buf).await {
+                let command = commands::from_bytes(&buf[..n]).await.unwrap();
+                let response = controller.process(command).await;
+                let _ = pipe.write_all(&response.to_bytes()).await;
+            }
         }
     }
 }

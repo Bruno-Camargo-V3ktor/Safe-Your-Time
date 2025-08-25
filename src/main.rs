@@ -1,8 +1,8 @@
 use crate::{
     communication::{Listener, ListenerSockter},
-    storage::{Storage, SurrealDbStorage},
+    storage::SurrealDbStorage,
 };
-use managers::{get_manager, Manager};
+use managers::{Manager, get_manager};
 use std::{env, time::Duration};
 use tokio::time::sleep;
 
