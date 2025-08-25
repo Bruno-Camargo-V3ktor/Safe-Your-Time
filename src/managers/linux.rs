@@ -54,4 +54,8 @@ impl Manager for LinuxManager {
     async fn domain_resolve(&self, domain: String) -> String {
         todo!()
     }
+
+    async fn get_username(&self) -> anyhow::Result<String> {
+        todo!()
+    }
 }
