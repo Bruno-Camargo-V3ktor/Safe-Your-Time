@@ -2,11 +2,10 @@ use crate::{
     models::{AppConfig, TimeBlock},
     storage::{AppConfigUpdate, Storage, TimeBlockUpdate},
 };
-use chrono::{DateTime, Local};
 use std::path::PathBuf;
 use surrealdb::{
-    engine::local::{Db, RocksDb},
     Surreal,
+    engine::local::{Db, RocksDb},
 };
 
 #[derive(Clone, Debug)]
@@ -30,6 +29,21 @@ impl SurrealDbStorage {
 
         database.use_ns(ns).use_db(db).await.unwrap();
 
+        let _ = database
+            .query(
+                r#"
+            DEFINE TABLE IF NOT EXISTS users TYPE NORMAL SCHEMALESS PERMISSIONS NONE;
+
+            DEFINE FIELD IF NOT EXISTS blocks ON users FLEXIBLE TYPE array<object> PERMISSIONS FULL;
+            DEFINE FIELD IF NOT EXISTS blocks[*] ON users FLEXIBLE TYPE object PERMISSIONS FULL;
+            DEFINE FIELD IF NOT EXISTS config ON users FLEXIBLE TYPE object PERMISSIONS FULL;
+            DEFINE FIELD IF NOT EXISTS username ON users TYPE string PERMISSIONS FULL;
+
+            DEFINE INDEX IF NOT EXISTS username_index ON users FIELDS username UNIQUE;
+        "#,
+            )
+            .await;
+
         Self { db: database }
     }
 }
@@ -37,6 +51,13 @@ impl SurrealDbStorage {
 #[async_trait::async_trait]
 impl Storage for SurrealDbStorage {
     async fn create_user(&self, username: String) -> anyhow::Result<String> {
+        todo!()
+    }
+
+    async fn get_user(
+        &self,
+        username: String,
+    ) -> anyhow::Result<Option<(AppConfig, Vec<TimeBlock>)>> {
         todo!()
     }
 
@@ -64,14 +85,6 @@ impl Storage for SurrealDbStorage {
     async fn get_all_time_block_by_user(
         &self,
         user: String,
-    ) -> anyhow::Result<Vec<(String, TimeBlock)>> {
-        todo!()
-    }
-
-    async fn get_time_block_by_date(
-        &self,
-        user: String,
-        date: DateTime<Local>,
     ) -> anyhow::Result<Vec<(String, TimeBlock)>> {
         todo!()
     }

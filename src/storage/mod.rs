@@ -28,6 +28,11 @@ pub type AppConfigUpdate = (
 pub trait Storage {
     async fn create_user(&self, username: String) -> anyhow::Result<String>;
 
+    async fn get_user(
+        &self,
+        username: String,
+    ) -> anyhow::Result<Option<(AppConfig, Vec<TimeBlock>)>>;
+
     async fn create_time_block(
         &self,
         user: String,
@@ -46,12 +51,6 @@ pub trait Storage {
     async fn get_all_time_block_by_user(
         &self,
         user: String,
-    ) -> anyhow::Result<Vec<(String, TimeBlock)>>;
-
-    async fn get_time_block_by_date(
-        &self,
-        user: String,
-        date: DateTime<Local>,
     ) -> anyhow::Result<Vec<(String, TimeBlock)>>;
 
     async fn create_config(
