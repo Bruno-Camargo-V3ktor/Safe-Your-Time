@@ -9,3 +9,16 @@ pub struct AppConfig {
     pub default_denied_apps: Vec<String>,
     pub default_message: String,
 }
+
+impl AppConfig {
+    pub fn default_configs() -> Self {
+        Self {
+            system_apps: vec![],
+            monitoring_time: 4000,
+            reload_time: 5000,
+            default_denied_acess: vec![],
+            default_denied_apps: vec![],
+            default_message: String::from("Focus!!!"),
+        }
+    }
+}
