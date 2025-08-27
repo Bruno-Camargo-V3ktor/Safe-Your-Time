@@ -31,7 +31,7 @@ pub trait Storage {
     async fn get_user_by_username(
         &self,
         username: String,
-    ) -> anyhow::Result<Option<(String, AppConfig, Vec<TimeBlock>)>>;
+    ) -> anyhow::Result<(String, AppConfig, Vec<TimeBlock>)>;
 
     async fn create_time_block(
         &self,

@@ -17,8 +17,11 @@ struct User {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct UserId {
+struct UserWithId {
     pub id: RecordId,
+    pub username: String,
+    pub config: AppConfig,
+    pub blocks: Vec<TimeBlock>,
 }
 
 #[derive(Clone, Debug)]
@@ -70,15 +73,24 @@ impl Storage for SurrealDbStorage {
             blocks: Vec::new(),
         };
 
-        let user_id: UserId = self.db.create("users").content(user).await?.unwrap();
+        let user_id: UserWithId = self.db.create("users").content(user).await?.unwrap();
         Ok(user_id.id.to_string())
     }
 
     async fn get_user_by_username(
         &self,
         username: String,
-    ) -> anyhow::Result<Option<(String, AppConfig, Vec<TimeBlock>)>> {
-        todo!()
+    ) -> anyhow::Result<(String, AppConfig, Vec<TimeBlock>)> {
+        let mut result = self
+            .db
+            .query("SELECT * FROM users WHERE username = $username LIMIT 1")
+            .bind(("username", username))
+            .await?;
+
+        let user: Option<UserWithId> = result.take(0)?;
+        let user = user.unwrap();
+
+        Ok((user.id.to_string(), user.config, user.blocks))
     }
 
     async fn create_time_block(
