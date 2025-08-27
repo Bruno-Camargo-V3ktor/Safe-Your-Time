@@ -28,40 +28,36 @@ pub type AppConfigUpdate = (
 pub trait Storage {
     async fn create_user(&self, username: String) -> anyhow::Result<String>;
 
-    async fn get_user(
+    async fn get_user_by_username(
         &self,
         username: String,
-    ) -> anyhow::Result<Option<(AppConfig, Vec<TimeBlock>)>>;
+    ) -> anyhow::Result<Option<(String, AppConfig, Vec<TimeBlock>)>>;
 
     async fn create_time_block(
         &self,
-        user: String,
+        user_id: String,
         name: String,
         time_block: TimeBlock,
     ) -> anyhow::Result<(String, TimeBlock)>;
 
-    async fn delete_time_block(&self, user: String, name: String) -> anyhow::Result<()>;
+    async fn delete_time_block(&self, user_id: String, name: String) -> anyhow::Result<()>;
 
     async fn update_time_block(
         &self,
-        user: String,
+        user_id: String,
         update_args: TimeBlockUpdate,
     ) -> anyhow::Result<TimeBlock>;
 
     async fn get_all_time_block_by_user(
         &self,
-        user: String,
+        user_id: String,
     ) -> anyhow::Result<Vec<(String, TimeBlock)>>;
 
-    async fn create_config(
-        &self,
-        user: String,
-        config: AppConfig,
-    ) -> anyhow::Result<(String, AppConfig)>;
+    async fn get_config(&self, user_id: String, config: AppConfig) -> anyhow::Result<AppConfig>;
 
     async fn update_config(
         &self,
-        user: String,
+        user_id: String,
         update_args: AppConfigUpdate,
     ) -> anyhow::Result<AppConfig>;
 }

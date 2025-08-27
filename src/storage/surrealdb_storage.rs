@@ -2,11 +2,24 @@ use crate::{
     models::{AppConfig, TimeBlock},
     storage::{AppConfigUpdate, Storage, TimeBlockUpdate},
 };
+use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use surrealdb::{
-    Surreal,
+    RecordId, Surreal,
     engine::local::{Db, RocksDb},
 };
+
+#[derive(Debug, Serialize, Deserialize)]
+struct User {
+    username: String,
+    config: AppConfig,
+    blocks: Vec<TimeBlock>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct UserId {
+    pub id: RecordId,
+}
 
 #[derive(Clone, Debug)]
 pub struct SurrealDbStorage {
@@ -51,13 +64,20 @@ impl SurrealDbStorage {
 #[async_trait::async_trait]
 impl Storage for SurrealDbStorage {
     async fn create_user(&self, username: String) -> anyhow::Result<String> {
-        todo!()
+        let user = User {
+            username,
+            config: AppConfig::default_configs(),
+            blocks: Vec::new(),
+        };
+
+        let user_id: UserId = self.db.create("users").content(user).await?.unwrap();
+        Ok(user_id.id.to_string())
     }
 
-    async fn get_user(
+    async fn get_user_by_username(
         &self,
         username: String,
-    ) -> anyhow::Result<Option<(AppConfig, Vec<TimeBlock>)>> {
+    ) -> anyhow::Result<Option<(String, AppConfig, Vec<TimeBlock>)>> {
         todo!()
     }
 
@@ -70,13 +90,13 @@ impl Storage for SurrealDbStorage {
         todo!()
     }
 
-    async fn delete_time_block(&self, user: String, name: String) -> anyhow::Result<()> {
+    async fn delete_time_block(&self, user_id: String, name: String) -> anyhow::Result<()> {
         todo!()
     }
 
     async fn update_time_block(
         &self,
-        user: String,
+        user_id: String,
         update_args: TimeBlockUpdate,
     ) -> anyhow::Result<TimeBlock> {
         todo!()
@@ -84,16 +104,12 @@ impl Storage for SurrealDbStorage {
 
     async fn get_all_time_block_by_user(
         &self,
-        user: String,
+        user_id: String,
     ) -> anyhow::Result<Vec<(String, TimeBlock)>> {
         todo!()
     }
 
-    async fn create_config(
-        &self,
-        user: String,
-        config: AppConfig,
-    ) -> anyhow::Result<(String, AppConfig)> {
+    async fn get_config(&self, user_id: String, config: AppConfig) -> anyhow::Result<AppConfig> {
         todo!()
     }
 
