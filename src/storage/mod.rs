@@ -33,12 +33,10 @@ pub trait Storage {
         username: String,
     ) -> anyhow::Result<(String, AppConfig, Vec<TimeBlock>)>;
 
-    async fn create_time_block(
-        &self,
-        user_id: String,
-        name: String,
-        time_block: TimeBlock,
-    ) -> anyhow::Result<(String, TimeBlock)>;
+    async fn get_time_block(&self, user_id: String, name: String) -> anyhow::Result<TimeBlock>;
+
+    async fn create_time_block(&self, user_id: String, time_block: TimeBlock)
+    -> anyhow::Result<()>;
 
     async fn delete_time_block(&self, user_id: String, name: String) -> anyhow::Result<()>;
 
@@ -53,7 +51,7 @@ pub trait Storage {
         user_id: String,
     ) -> anyhow::Result<Vec<(String, TimeBlock)>>;
 
-    async fn get_config(&self, user_id: String, config: AppConfig) -> anyhow::Result<AppConfig>;
+    async fn get_config(&self, user_id: String) -> anyhow::Result<AppConfig>;
 
     async fn update_config(
         &self,

@@ -93,13 +93,25 @@ impl Storage for SurrealDbStorage {
         Ok((user.id.to_string(), user.config, user.blocks))
     }
 
+    async fn get_time_block(&self, user_id: String, name: String) -> anyhow::Result<TimeBlock> {
+        todo!()
+    }
+
     async fn create_time_block(
         &self,
-        user: String,
-        name: String,
+        user_id: String,
         time_block: TimeBlock,
-    ) -> anyhow::Result<(String, TimeBlock)> {
-        todo!()
+    ) -> anyhow::Result<()> {
+        let user_id: Vec<&str> = user_id.split(":").collect();
+        let _ = self
+            .db
+            .query("UPDATE $id SET blocks += $block_time WHERE $name NOT IN blocks.name")
+            .bind(("id", RecordId::from((user_id[0], user_id[1]))))
+            .bind(("block_time", time_block.clone()))
+            .bind(("name", time_block.name))
+            .await?;
+
+        Ok(())
     }
 
     async fn delete_time_block(&self, user_id: String, name: String) -> anyhow::Result<()> {
@@ -121,7 +133,7 @@ impl Storage for SurrealDbStorage {
         todo!()
     }
 
-    async fn get_config(&self, user_id: String, config: AppConfig) -> anyhow::Result<AppConfig> {
+    async fn get_config(&self, user_id: String) -> anyhow::Result<AppConfig> {
         todo!()
     }
 
