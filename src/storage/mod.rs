@@ -26,36 +26,26 @@ pub type AppConfigUpdate = (
 
 #[async_trait::async_trait]
 pub trait Storage {
-    async fn create_user(&self, username: String) -> anyhow::Result<String>;
+    async fn get_time_block(&self, user: String, name: String)
+    -> anyhow::Result<Option<TimeBlock>>;
 
-    async fn get_user_by_username(
-        &self,
-        username: String,
-    ) -> anyhow::Result<(String, AppConfig, Vec<TimeBlock>)>;
+    async fn create_time_block(&self, user: String, time_block: TimeBlock) -> anyhow::Result<()>;
 
-    async fn get_time_block(&self, user_id: String, name: String) -> anyhow::Result<TimeBlock>;
-
-    async fn create_time_block(&self, user_id: String, time_block: TimeBlock)
-    -> anyhow::Result<()>;
-
-    async fn delete_time_block(&self, user_id: String, name: String) -> anyhow::Result<()>;
+    async fn delete_time_block(&self, user: String, name: String) -> anyhow::Result<()>;
 
     async fn update_time_block(
         &self,
-        user_id: String,
+        user: String,
         update_args: TimeBlockUpdate,
-    ) -> anyhow::Result<TimeBlock>;
+    ) -> anyhow::Result<Option<TimeBlock>>;
 
-    async fn get_all_time_block_by_user(
-        &self,
-        user_id: String,
-    ) -> anyhow::Result<Vec<(String, TimeBlock)>>;
+    async fn get_all_time_block(&self, user: String) -> anyhow::Result<Vec<(String, TimeBlock)>>;
 
-    async fn get_config(&self, user_id: String) -> anyhow::Result<AppConfig>;
+    async fn get_config(&self, user: String) -> anyhow::Result<AppConfig>;
 
     async fn update_config(
         &self,
-        user_id: String,
+        user: String,
         update_args: AppConfigUpdate,
     ) -> anyhow::Result<AppConfig>;
 }

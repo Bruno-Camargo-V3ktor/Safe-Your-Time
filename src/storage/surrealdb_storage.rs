@@ -66,47 +66,20 @@ impl SurrealDbStorage {
 
 #[async_trait::async_trait]
 impl Storage for SurrealDbStorage {
-    async fn create_user(&self, username: String) -> anyhow::Result<String> {
-        let user = User {
-            username,
-            config: AppConfig::default_configs(),
-            blocks: Vec::new(),
-        };
-
-        let user_id: UserWithId = self.db.create("users").content(user).await?.unwrap();
-        Ok(user_id.id.to_string())
-    }
-
-    async fn get_user_by_username(
+    async fn get_time_block(
         &self,
-        username: String,
-    ) -> anyhow::Result<(String, AppConfig, Vec<TimeBlock>)> {
-        let mut result = self
-            .db
-            .query("SELECT * FROM users WHERE username = $username LIMIT 1")
-            .bind(("username", username))
-            .await?;
-
-        let user: Option<UserWithId> = result.take(0)?;
-        let user = user.unwrap();
-
-        Ok((user.id.to_string(), user.config, user.blocks))
-    }
-
-    async fn get_time_block(&self, user_id: String, name: String) -> anyhow::Result<TimeBlock> {
+        user: String,
+        name: String,
+    ) -> anyhow::Result<Option<TimeBlock>> {
         todo!()
     }
 
-    async fn create_time_block(
-        &self,
-        user_id: String,
-        time_block: TimeBlock,
-    ) -> anyhow::Result<()> {
-        let user_id: Vec<&str> = user_id.split(":").collect();
+    async fn create_time_block(&self, user: String, time_block: TimeBlock) -> anyhow::Result<()> {
+        let user = self.get_user_by_username(user.clone()).await?;
         let _ = self
             .db
             .query("UPDATE $id SET blocks += $block_time WHERE $name NOT IN blocks.name")
-            .bind(("id", RecordId::from((user_id[0], user_id[1]))))
+            .bind(("id", user.id))
             .bind(("block_time", time_block.clone()))
             .bind(("name", time_block.name))
             .await?;
@@ -114,26 +87,23 @@ impl Storage for SurrealDbStorage {
         Ok(())
     }
 
-    async fn delete_time_block(&self, user_id: String, name: String) -> anyhow::Result<()> {
+    async fn delete_time_block(&self, user: String, name: String) -> anyhow::Result<()> {
         todo!()
     }
 
     async fn update_time_block(
         &self,
-        user_id: String,
+        user: String,
         update_args: TimeBlockUpdate,
-    ) -> anyhow::Result<TimeBlock> {
+    ) -> anyhow::Result<Option<TimeBlock>> {
         todo!()
     }
 
-    async fn get_all_time_block_by_user(
-        &self,
-        user_id: String,
-    ) -> anyhow::Result<Vec<(String, TimeBlock)>> {
+    async fn get_all_time_block(&self, user: String) -> anyhow::Result<Vec<(String, TimeBlock)>> {
         todo!()
     }
 
-    async fn get_config(&self, user_id: String) -> anyhow::Result<AppConfig> {
+    async fn get_config(&self, user: String) -> anyhow::Result<AppConfig> {
         todo!()
     }
 
@@ -143,5 +113,31 @@ impl Storage for SurrealDbStorage {
         update_args: AppConfigUpdate,
     ) -> anyhow::Result<AppConfig> {
         todo!()
+    }
+}
+
+impl SurrealDbStorage {
+    async fn create_user(&self, username: String) -> anyhow::Result<UserWithId> {
+        let user = User {
+            username,
+            config: AppConfig::default_configs(),
+            blocks: Vec::new(),
+        };
+
+        let user: UserWithId = self.db.create("users").content(user).await?.unwrap();
+        Ok(user)
+    }
+
+    async fn get_user_by_username(&self, username: String) -> anyhow::Result<UserWithId> {
+        let mut result = self
+            .db
+            .query("SELECT * FROM users WHERE username = $username LIMIT 1")
+            .bind(("username", username))
+            .await?;
+
+        let user: Option<UserWithId> = result.take(0)?;
+        let user = user.unwrap();
+
+        Ok(user)
     }
 }
