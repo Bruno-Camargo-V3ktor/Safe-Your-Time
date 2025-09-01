@@ -1,7 +1,6 @@
 use crate::{
     communication::{Listener, ListenerSockter},
-    models::StateBlock,
-    storage::{Storage, SurrealDbStorage},
+    storage::SurrealDbStorage,
 };
 use managers::{Manager, get_manager};
 use models::TimeBlock;
@@ -30,11 +29,6 @@ async fn main() {
         "sytd-db",
     )
     .await;
-
-    let (user_id, config, blocks) = storage
-        .get_user_by_username("bruno.camargo".to_string())
-        .await
-        .unwrap();
 
     let server_handle = tokio::spawn(async move {
         let controller =

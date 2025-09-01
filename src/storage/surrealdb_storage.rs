@@ -1,28 +1,14 @@
 use crate::{
-    models::{AppConfig, TimeBlock},
-    storage::{AppConfigUpdate, Storage, TimeBlockUpdate},
+    models::AppConfig,
+    storage::{Storage, User},
 };
-use serde::{Deserialize, Serialize};
+use anyhow::Ok;
+use sha1::{Digest, Sha1};
 use std::path::PathBuf;
 use surrealdb::{
-    RecordId, Surreal,
+    Surreal,
     engine::local::{Db, RocksDb},
 };
-
-#[derive(Debug, Serialize, Deserialize)]
-struct User {
-    username: String,
-    config: AppConfig,
-    blocks: Vec<TimeBlock>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-struct UserWithId {
-    pub id: RecordId,
-    pub username: String,
-    pub config: AppConfig,
-    pub blocks: Vec<TimeBlock>,
-}
 
 #[derive(Clone, Debug)]
 pub struct SurrealDbStorage {
@@ -46,17 +32,13 @@ impl SurrealDbStorage {
         database.use_ns(ns).use_db(db).await.unwrap();
 
         let _ = database
-            .query(
-                r#"
-            DEFINE TABLE IF NOT EXISTS users TYPE NORMAL SCHEMALESS PERMISSIONS NONE;
+            .query(r#"
+                DEFINE TABLE IF NOT EXISTS users TYPE NORMAL SCHEMALESS PERMISSIONS NONE;
 
-            DEFINE FIELD IF NOT EXISTS blocks ON users FLEXIBLE TYPE array<object> PERMISSIONS FULL;
-            DEFINE FIELD IF NOT EXISTS blocks[*] ON users FLEXIBLE TYPE object PERMISSIONS FULL;
-            DEFINE FIELD IF NOT EXISTS config ON users FLEXIBLE TYPE object PERMISSIONS FULL;
-            DEFINE FIELD IF NOT EXISTS username ON users TYPE string PERMISSIONS FULL;
-
-            DEFINE INDEX IF NOT EXISTS username_index ON users FIELDS username UNIQUE;
-        "#,
+                DEFINE FIELD IF NOT EXISTS blocks ON users FLEXIBLE TYPE array<object> PERMISSIONS FULL;
+                DEFINE FIELD IF NOT EXISTS blocks[*] ON users FLEXIBLE TYPE object PERMISSIONS FULL;
+                DEFINE FIELD IF NOT EXISTS config ON users FLEXIBLE TYPE object PERMISSIONS FULL;
+            "#,
             )
             .await;
 
@@ -66,78 +48,44 @@ impl SurrealDbStorage {
 
 #[async_trait::async_trait]
 impl Storage for SurrealDbStorage {
-    async fn get_time_block(
-        &self,
-        user: String,
-        name: String,
-    ) -> anyhow::Result<Option<TimeBlock>> {
-        todo!()
-    }
-
-    async fn create_time_block(&self, user: String, time_block: TimeBlock) -> anyhow::Result<()> {
-        let user = self.get_user_by_username(user.clone()).await?;
-        let _ = self
+    async fn save(&self, user: &User) -> anyhow::Result<()> {
+        let user_id = hash_username(user.username.clone());
+        let _: Option<User> = self
             .db
-            .query("UPDATE $id SET blocks += $block_time WHERE $name NOT IN blocks.name")
-            .bind(("id", user.id))
-            .bind(("block_time", time_block.clone()))
-            .bind(("name", time_block.name))
+            .update(("users", &user_id))
+            .content(user.clone())
             .await?;
-
         Ok(())
     }
 
-    async fn delete_time_block(&self, user: String, name: String) -> anyhow::Result<()> {
-        todo!()
+    async fn load(&self, username: String) -> anyhow::Result<Option<User>> {
+        let user_id = hash_username(username.clone());
+        let user: Option<User> = self.db.select(("users", &user_id)).await?;
+        Ok(user)
     }
 
-    async fn update_time_block(
-        &self,
-        user: String,
-        update_args: TimeBlockUpdate,
-    ) -> anyhow::Result<Option<TimeBlock>> {
-        todo!()
-    }
+    async fn create(&self, username: String) -> anyhow::Result<User> {
+        let user_id = hash_username(username.clone());
+        let user = User {
+            username,
+            blocks: vec![],
+            config: AppConfig::default_configs(),
+        };
 
-    async fn get_all_time_block(&self, user: String) -> anyhow::Result<Vec<(String, TimeBlock)>> {
-        todo!()
-    }
-
-    async fn get_config(&self, user: String) -> anyhow::Result<AppConfig> {
-        todo!()
-    }
-
-    async fn update_config(
-        &self,
-        user: String,
-        update_args: AppConfigUpdate,
-    ) -> anyhow::Result<AppConfig> {
-        todo!()
+        let created_user: User = self
+            .db
+            .create(("users", &user_id))
+            .content(user)
+            .await?
+            .unwrap();
+        Ok(created_user)
     }
 }
 
-impl SurrealDbStorage {
-    async fn create_user(&self, username: String) -> anyhow::Result<UserWithId> {
-        let user = User {
-            username,
-            config: AppConfig::default_configs(),
-            blocks: Vec::new(),
-        };
+pub fn hash_username(username: String) -> String {
+    let mut hasher = Sha1::new();
+    hasher.update(&username.into_bytes());
+    let result = hasher.finalize();
 
-        let user: UserWithId = self.db.create("users").content(user).await?.unwrap();
-        Ok(user)
-    }
-
-    async fn get_user_by_username(&self, username: String) -> anyhow::Result<UserWithId> {
-        let mut result = self
-            .db
-            .query("SELECT * FROM users WHERE username = $username LIMIT 1")
-            .bind(("username", username))
-            .await?;
-
-        let user: Option<UserWithId> = result.take(0)?;
-        let user = user.unwrap();
-
-        Ok(user)
-    }
+    format!("{:x}", result)
 }
