@@ -1,4 +1,3 @@
-use chrono::{DateTime, Duration, Local};
 use serde::{
     Deserialize, Serialize,
     de::{self, Visitor},
@@ -28,10 +27,20 @@ pub struct TimeBlock {
     pub allow_apps: Vec<String>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct TimeRegister {
-    pub hours: u8,
-    pub minutes: u8,
+    hours: u8,
+    minutes: u8,
+}
+
+impl TimeRegister {
+    pub fn new(hours: u8, minutes: u8) -> Result<Self, String> {
+        if hours > 23 || minutes > 59 {
+            Err(String::from("invalid time"))
+        } else {
+            Ok(Self { hours, minutes })
+        }
+    }
 }
 
 impl Serialize for TimeRegister {
