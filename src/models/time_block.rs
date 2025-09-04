@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use serde::{
     Deserialize, Serialize,
     de::{self, Visitor},
@@ -5,20 +7,32 @@ use serde::{
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum StateBlock {
-    None,
+    Idle,
     InProgress,
     Paused,
     Finished,
 }
 
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, Serialize, Deserialize)]
+pub enum DayOfWeek {
+    Sunday,
+    Monday,
+    Tuesday,
+    Wednesday,
+    Thursday,
+    Friday,
+    Saturday,
+}
+
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct TimeBlock {
     pub name: String,
-    pub durantion: TimeRegister,
     pub message: Option<String>,
     pub start_time: TimeRegister,
     pub end_time: TimeRegister,
     pub state: StateBlock,
+
+    pub days: HashSet<DayOfWeek>,
 
     pub denied_acess: Vec<String>,
     pub allow_acess: Vec<String>,
