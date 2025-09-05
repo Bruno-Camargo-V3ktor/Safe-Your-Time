@@ -69,11 +69,19 @@ fn spawn_socket_listener(
 
 fn spawn_monitoting_apps(state: Arc<RwLock<StateApp>>) -> JoinHandle<()> {
     tokio::spawn(async move {
+        let mut time = 5000;
         loop {
-            sleep(Duration::from_millis(5000)).await;
-            get_manager()
-                .monitoring_apps(vec!["librum".to_string()])
-                .await;
+            let app_state = state.read().await;
+            if let Some(config) = &app_state.config {
+                time = config.monitoring_time;
+
+                if let Some(time_block) = &app_state.active_time_block {
+                    let mut apps = time_block.denied_apps.clone();
+                    apps.append(&mut config.default_denied_apps.clone());
+                    get_manager().monitoring_apps(apps).await;
+                }
+            }
+            sleep(Duration::from_millis(time as u64)).await;
         }
     })
 }
