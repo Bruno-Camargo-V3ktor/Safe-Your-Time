@@ -28,6 +28,7 @@ pub enum DayOfWeek {
 pub struct TimeBlock {
     pub name: String,
     pub message: Option<String>,
+    pub duration: TimeRegister,
     pub start_time: TimeRegister,
     pub end_time: TimeRegister,
     pub state: StateBlock,
