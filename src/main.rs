@@ -1,23 +1,29 @@
 use crate::{
     communication::{Listener, ListenerSockter},
-    storage::SurrealDbStorage,
+    storage::{Storage, SurrealDbStorage},
 };
 use managers::{Manager, get_manager};
 use models::TimeBlock;
 use std::{env, sync::Arc, time::Duration};
-use tokio::{sync::RwLock, time::sleep};
+use tokio::{sync::RwLock, task::JoinHandle, time::sleep};
 
 mod communication;
 mod managers;
 mod models;
 mod storage;
 
+pub struct StateApp {
+    user: Option<String>,
+    active_time_block: Option<TimeBlock>,
+}
+
 #[tokio::main]
 async fn main() {
-    let state_app = Arc::new(RwLock::new((
-        String::new(),
-        (String::new(), Option::<TimeBlock>::None),
-    )));
+    let state_app = Arc::new(RwLock::new(StateApp {
+        user: get_manager().get_username().await.ok(),
+        active_time_block: None,
+    }));
+
     let storage = SurrealDbStorage::new(
         env::current_exe()
             .unwrap()
@@ -30,15 +36,7 @@ async fn main() {
     )
     .await;
 
-    let server_handle = tokio::spawn(async move {
-        let controller =
-            communication::Controller::new(Box::new(storage.clone()), state_app.clone());
-
-        let listener_serve = ListenerSockter::new(controller);
-
-        let _ = listener_serve.server("/tmp/sytd.sock").await;
-    });
-
+    let server_handle = spawn_socket_listener(Box::new(storage.clone()), state_app.clone());
     let monitoring_apps_handle = tokio::spawn(async move {
         loop {
             sleep(Duration::from_millis(5000)).await;
@@ -49,4 +47,15 @@ async fn main() {
     });
 
     let _ = tokio::join!(server_handle, monitoring_apps_handle);
+}
+
+fn spawn_socket_listener(
+    storage: Box<dyn Storage + Send + Sync>,
+    state: Arc<RwLock<StateApp>>,
+) -> JoinHandle<()> {
+    tokio::spawn(async move {
+        let controller = communication::Controller::new(storage, state);
+        let listener_serve = ListenerSockter::new(controller);
+        let _ = listener_serve.server("/tmp/sytd.sock").await;
+    })
 }

@@ -1,18 +1,15 @@
 use super::{Responses, commands::Commands};
-use crate::{models::TimeBlock, storage::Storage};
+use crate::{StateApp, models::TimeBlock, storage::Storage};
 use std::sync::Arc;
 use tokio::sync::RwLock;
 
-/// username, id, timeblock
-type AppState = Arc<RwLock<(String, (String, Option<TimeBlock>))>>;
-
 pub struct Controller {
     storage: Box<dyn Storage + Send + Sync>,
-    state: AppState,
+    state: Arc<RwLock<StateApp>>,
 }
 
 impl Controller {
-    pub fn new(storage: Box<dyn Storage + Send + Sync>, state: AppState) -> Self {
+    pub fn new(storage: Box<dyn Storage + Send + Sync>, state: Arc<RwLock<StateApp>>) -> Self {
         Self { storage, state }
     }
 
