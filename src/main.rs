@@ -11,6 +11,7 @@ use tokio::{sync::RwLock, task::JoinHandle, time::sleep};
 mod communication;
 mod managers;
 mod models;
+mod service;
 mod storage;
 
 pub struct StateApp {
