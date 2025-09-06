@@ -2,10 +2,11 @@ use crate::{
     communication::{Listener, ListenerSockter},
     models::AppConfig,
     storage::{Storage, SurrealDbStorage},
+    utils::{get_dir, shutdown_signal},
 };
 use managers::{Manager, get_manager};
 use models::TimeBlock;
-use std::{env, sync::Arc, time::Duration};
+use std::{sync::Arc, time::Duration};
 use tokio::{sync::RwLock, task::JoinHandle, time::sleep};
 
 mod communication;
@@ -13,6 +14,7 @@ mod managers;
 mod models;
 mod service;
 mod storage;
+mod utils;
 
 pub struct StateApp {
     user: Option<String>,
@@ -22,35 +24,18 @@ pub struct StateApp {
 
 #[tokio::main]
 async fn main() {
-    let current_dir = env::current_exe()
-        .unwrap()
-        .parent()
-        .unwrap()
-        .to_str()
-        .unwrap()
-        .to_string();
-
     let state_app = Arc::new(RwLock::new(StateApp {
         user: get_manager().get_username().await.ok(),
         config: None,
         active_time_block: None,
     }));
-
-    let storage = Box::new(SurrealDbStorage::new(&current_dir, "sytd-ns", "sytd-db").await);
+    let storage = Box::new(SurrealDbStorage::new(&get_dir(), "sytd-ns", "sytd-db").await);
+    //let controller = communication::Controller::new(storage, state);
 
     let mut socket_listener_handle = spawn_socket_listener(storage.clone(), state_app.clone());
     let mut monitoring_apps_handle = spawn_monitoting_apps(state_app.clone());
 
-    loop {
-        sleep(Duration::from_millis(5000)).await;
-        if socket_listener_handle.is_finished() {
-            socket_listener_handle = spawn_socket_listener(storage.clone(), state_app.clone());
-        }
-
-        if monitoring_apps_handle.is_finished() {
-            monitoring_apps_handle = spawn_monitoting_apps(state_app.clone());
-        }
-    }
+    shutdown_signal().await
 }
 
 fn spawn_socket_listener(
