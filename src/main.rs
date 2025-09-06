@@ -1,11 +1,10 @@
 use crate::{
     communication::{Listener, ListenerSockter},
-    models::AppConfig,
+    state_app::StateApp,
     storage::{Storage, SurrealDbStorage},
     utils::{get_dir, shutdown_signal},
 };
 use managers::{Manager, get_manager};
-use models::TimeBlock;
 use std::{sync::Arc, time::Duration};
 use tokio::{sync::RwLock, task::JoinHandle, time::sleep};
 
@@ -13,22 +12,13 @@ mod communication;
 mod managers;
 mod models;
 mod service;
+mod state_app;
 mod storage;
 mod utils;
 
-pub struct StateApp {
-    user: Option<String>,
-    config: Option<AppConfig>,
-    active_time_block: Option<TimeBlock>,
-}
-
 #[tokio::main]
 async fn main() {
-    let state_app = Arc::new(RwLock::new(StateApp {
-        user: get_manager().get_username().await.ok(),
-        config: None,
-        active_time_block: None,
-    }));
+    let state_app = StateApp::new();
     let storage = Box::new(SurrealDbStorage::new(&get_dir(), "sytd-ns", "sytd-db").await);
     //let controller = communication::Controller::new(storage, state);
 
@@ -54,10 +44,10 @@ fn spawn_monitoting_apps(state: Arc<RwLock<StateApp>>) -> JoinHandle<()> {
         let mut time = 5000;
         loop {
             let app_state = state.read().await;
-            if let Some(config) = &app_state.config {
+            if let Some(config) = app_state.get_config() {
                 time = config.monitoring_time;
 
-                if let Some(time_block) = &app_state.active_time_block {
+                if let Some(time_block) = app_state.get_active_time_block() {
                     let mut apps = time_block.denied_apps.clone();
                     apps.append(&mut config.default_denied_apps.clone());
                     get_manager().monitoring_apps(apps).await;
