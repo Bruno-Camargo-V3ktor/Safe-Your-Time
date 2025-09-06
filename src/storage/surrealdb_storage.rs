@@ -1,8 +1,5 @@
-use crate::{
-    models::AppConfig,
-    storage::{Storage, User},
-};
-use anyhow::Ok;
+use super::Storage;
+use crate::models::{AppConfig, User};
 use sha1::{Digest, Sha1};
 use std::path::PathBuf;
 use surrealdb::{
