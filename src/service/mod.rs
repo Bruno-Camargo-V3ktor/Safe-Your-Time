@@ -1,5 +1,8 @@
 use std::time::Duration;
 
+mod monitoring_apps_service;
+pub use monitoring_apps_service::*;
+
 #[async_trait::async_trait]
 pub trait Service {
     async fn exec(&mut self);
@@ -19,7 +22,7 @@ impl ServiceController {
             .push((Box::new(service), Duration::from_millis(time)));
     }
 
-    pub async fn init(mut self) {
+    pub async fn init(self) {
         for (mut service, time) in self.services.into_iter() {
             tokio::spawn(async move {
                 let mut interval = tokio::time::interval(time);

@@ -2,6 +2,8 @@ use crate::models::{AppConfig, TimeBlock};
 use std::sync::Arc;
 use tokio::sync::RwLock;
 
+pub type StateAppArc = Arc<RwLock<StateApp>>;
+
 pub struct StateApp {
     user: Option<String>,
     config: Option<AppConfig>,
