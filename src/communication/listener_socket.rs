@@ -1,22 +1,22 @@
 use super::Listener;
 use super::commands;
-use super::controller::Controller;
+use super::controller::SharedController;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
 pub struct ListenerSockter {
-    controller: Controller,
+    controller: SharedController,
 }
 
 impl ListenerSockter {
-    pub fn new(controller: Controller) -> Self {
+    pub fn new(controller: SharedController) -> Self {
         Self { controller }
     }
 }
 
 #[async_trait::async_trait]
 impl Listener for ListenerSockter {
-    fn get_controller(&self) -> &Controller {
-        &self.controller
+    fn get_controller(&self) -> SharedController {
+        self.controller.clone()
     }
 
     #[cfg(any(target_os = "linux", target_os = "macos"))]
@@ -34,7 +34,7 @@ impl Listener for ListenerSockter {
             let mut buf = vec![0; 1024];
             let n = socket.read(&mut buf).await.unwrap();
             let command = commands::from_bytes(&buf[..n]).await.unwrap();
-            let response = controller.process(command).await;
+            let response = controller.read().await.process(command).await;
 
             let _ = socket.write_all(&response.to_bytes()).await;
         }
@@ -58,7 +58,7 @@ impl Listener for ListenerSockter {
             let mut buf = vec![0; 1024];
             if let Ok(n) = pipe.read(&mut buf).await {
                 let command = commands::from_bytes(&buf[..n]).await.unwrap();
-                let response = controller.process(command).await;
+                let response = controller.read().await.process(command).await;
                 let _ = pipe.write_all(&response.to_bytes()).await;
             }
         }

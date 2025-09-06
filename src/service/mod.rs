@@ -1,6 +1,8 @@
 use std::time::Duration;
 
+mod listener_socket_service;
 mod monitoring_apps_service;
+pub use listener_socket_service::*;
 pub use monitoring_apps_service::*;
 
 #[async_trait::async_trait]
