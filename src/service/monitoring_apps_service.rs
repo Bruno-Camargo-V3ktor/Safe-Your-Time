@@ -1,15 +1,15 @@
 use super::Service;
 use crate::{
     managers::{Manager, get_manager},
-    state_app::StateAppArc,
+    state_app::SharedStateApp,
 };
 
 pub struct MonitoringAppsService {
-    state: StateAppArc,
+    state: SharedStateApp,
 }
 
 impl MonitoringAppsService {
-    pub fn new(state: StateAppArc) -> Self {
+    pub fn new(state: SharedStateApp) -> Self {
         Self { state }
     }
 }
