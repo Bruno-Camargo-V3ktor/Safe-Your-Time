@@ -1,9 +1,9 @@
-use actix_web::{App, HttpServer};
-use tokio::task::JoinHandle;
-
-use crate::{communication::SharedController, state_app::SharedStateApp};
-
 use super::Service;
+use crate::{
+    communication::{Listener, ListenerHttp, SharedController},
+    state_app::SharedStateApp,
+};
+use tokio::task::JoinHandle;
 
 pub struct ListenerHttpService {
     state: SharedStateApp,
@@ -21,12 +21,10 @@ impl ListenerHttpService {
     }
 
     fn start_server(&mut self) {
+        let controller = self.controller.clone();
         self.server_handle = Some(tokio::spawn(async move {
-            let _ = HttpServer::new(|| App::new().route("/hey", actix_web::web::get().to(hey)))
-                .bind(("127.0.0.1", 4321))
-                .unwrap()
-                .run()
-                .await;
+            let listener_http = ListenerHttp::new(controller);
+            let _ = listener_http.server("127.0.0.1").await;
         }));
     }
 }
@@ -56,8 +54,4 @@ impl Service for ListenerHttpService {
             }
         };
     }
-}
-
-async fn hey() -> impl actix_web::Responder {
-    actix_web::HttpResponse::Ok().body("hey")
 }
