@@ -1,19 +1,18 @@
 use super::{Responses, commands::Commands};
-use crate::{state_app::SharedStateApp, storage::Storage};
+use crate::{state_app::SharedStateApp, storage::SharedStorage};
 use std::sync::Arc;
-use tokio::sync::RwLock;
 
-pub type SharedController = Arc<RwLock<Controller>>;
+pub type SharedController = Arc<Controller>;
 
 pub struct Controller {
-    storage: Box<dyn Storage + Send + Sync>,
+    storage: SharedStorage,
     state: SharedStateApp,
 }
 
 impl Controller {
-    pub fn new(storage: Box<dyn Storage + Send + Sync>, state: SharedStateApp) -> SharedController {
+    pub fn new(storage: SharedStorage, state: SharedStateApp) -> SharedController {
         let controller = Self { storage, state };
-        Arc::new(RwLock::new(controller))
+        Arc::new(controller)
     }
 
     pub async fn process(&self, command: Commands) -> Responses {

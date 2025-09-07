@@ -1,7 +1,11 @@
+use std::sync::Arc;
+
 use crate::models::User;
 
 mod surrealdb_storage;
 pub use surrealdb_storage::*;
+
+pub type SharedStorage = Arc<dyn Storage + Send + Sync>;
 
 #[async_trait::async_trait]
 pub trait Storage {

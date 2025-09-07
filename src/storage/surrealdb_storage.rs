@@ -1,7 +1,7 @@
-use super::Storage;
+use super::{SharedStorage, Storage};
 use crate::models::{AppConfig, User};
 use sha1::{Digest, Sha1};
-use std::path::PathBuf;
+use std::{path::PathBuf, sync::Arc};
 use surrealdb::{
     Surreal,
     engine::local::{Db, RocksDb},
@@ -17,7 +17,7 @@ impl SurrealDbStorage {
         path: impl Into<String>,
         ns: impl Into<String>,
         db: impl Into<String>,
-    ) -> Self {
+    ) -> SharedStorage {
         let mut db_path = PathBuf::from(path.into());
         db_path.push("mem");
         std::fs::create_dir_all(&db_path).unwrap();
@@ -39,7 +39,7 @@ impl SurrealDbStorage {
             )
             .await;
 
-        Self { db: database }
+        Arc::new(Self { db: database })
     }
 }
 

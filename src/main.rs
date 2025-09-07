@@ -17,10 +17,10 @@ mod utils;
 #[tokio::main]
 async fn main() {
     let state_app = StateApp::new();
-    let mut services = ServiceController::new();
-    let storage = Box::new(SurrealDbStorage::new(&get_dir(), "sytd-ns", "sytd-db").await);
+    let storage = SurrealDbStorage::new(&get_dir(), "sytd-ns", "sytd-db").await;
     let controller = Controller::new(storage.clone(), state_app.clone());
 
+    let mut services = ServiceController::new();
     services.add_service(MonitoringAppsService::new(state_app.clone()), 5000);
     services.add_service(
         ListenerSocketService::new(state_app.clone(), controller.clone()),

@@ -34,7 +34,7 @@ impl Listener for ListenerSockter {
             let mut buf = vec![0; 1024];
             let n = socket.read(&mut buf).await.unwrap();
             let command = commands::from_bytes(&buf[..n]).await.unwrap();
-            let response = controller.read().await.process(command).await;
+            let response = controller.process(command).await;
 
             let _ = socket.write_all(&response.to_bytes()).await;
         }
