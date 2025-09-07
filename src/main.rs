@@ -1,6 +1,8 @@
 use crate::{
     communication::Controller,
-    service::{ListenerSocketService, MonitoringAppsService, ServiceController},
+    service::{
+        ListenerHttpService, ListenerSocketService, MonitoringAppsService, ServiceController,
+    },
     state_app::StateApp,
     storage::SurrealDbStorage,
     utils::{get_dir, shutdown_signal},
@@ -22,9 +24,14 @@ async fn main() {
 
     let mut services = ServiceController::new();
     services.add_service(MonitoringAppsService::new(state_app.clone()), 5000);
+
     services.add_service(
         ListenerSocketService::new(state_app.clone(), controller.clone()),
         5000,
+    );
+    services.add_service(
+        ListenerHttpService::new(state_app.clone(), controller.clone()),
+        10000,
     );
     services.init().await;
 

@@ -22,3 +22,4 @@ anyhow = "1.0"
 async-trait = "0.1.89"
 surrealdb = { version = "2.3.7", features = ["kv-rocksdb", "kv-mem"] }
 sha1 = "0.10.6"
+actix-web = "4"

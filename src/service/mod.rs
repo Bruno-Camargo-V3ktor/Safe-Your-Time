@@ -1,7 +1,11 @@
 use std::time::Duration;
 
+mod firewall_service;
+mod listener_http_service;
 mod listener_socket_service;
 mod monitoring_apps_service;
+pub use firewall_service::*;
+pub use listener_http_service::*;
 pub use listener_socket_service::*;
 pub use monitoring_apps_service::*;
 
