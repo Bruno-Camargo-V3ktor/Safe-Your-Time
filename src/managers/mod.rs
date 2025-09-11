@@ -13,9 +13,9 @@ pub trait Manager {
 
     async fn firewall_block(&self, ip: String, rule_name: String) -> anyhow::Result<()>;
 
-    async fn firewall_allow(&self, ip: String, rule_name: String) -> anyhow::Result<()>;
-
     async fn firewall_clean(&self, rule_name: String) -> anyhow::Result<()>;
+
+    async fn firewall_clean_all(&self) -> anyhow::Result<()>;
 
     async fn get_username(&self) -> anyhow::Result<String>;
 }

@@ -29,9 +29,10 @@ impl ServiceController {
     }
 
     pub async fn init(self) {
-        for (mut service, time) in self.services.into_iter() {
+        for (service, time) in self.services.into_iter() {
             tokio::spawn(async move {
-                let mut interval = tokio::time::interval(time);
+                let mut interval = tokio::time::interval(time.clone());
+                let mut service = service;
 
                 loop {
                     interval.tick().await;

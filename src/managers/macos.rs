@@ -15,7 +15,7 @@ impl Manager for MacOsManager {
         todo!()
     }
 
-    async fn firewall_allow(&self, ip: String, rule_name: String) -> anyhow::Result<()> {
+    async fn firewall_clean_all(&self) -> anyhow::Result<()> {
         todo!()
     }
 
