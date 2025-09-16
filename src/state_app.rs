@@ -22,4 +22,11 @@ impl StateApp {
 
         Arc::new(RwLock::new(state))
     }
+
+    pub fn clear_state(&mut self) {
+        self.user = None;
+        self.config = None;
+        self.active_time_block = None;
+        self.time_blocks.clear();
+    }
 }

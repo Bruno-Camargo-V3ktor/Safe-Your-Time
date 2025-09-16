@@ -29,12 +29,30 @@ impl InitStateService {
 impl Service for InitStateService {
     async fn exec(&mut self) {
         let manager = get_manager();
-        let current_username = manager.get_username().await;
+        let system_user = manager.get_username().await.ok();
+        let mut state = self.state.write().await;
 
-        let state = self.state.write().await;
+        if system_user.is_none() && state.user.is_some() {
+            state.clear_state();
+            return;
+        }
 
-        if let Ok(username) = current_username {
-            let user = self.get_user_by_username(username.clone()).await;
+        if (state.user != system_user) && system_user.is_some() {
+            let username = system_user.unwrap();
+            match self.get_user_by_username(username.clone()).await {
+                Some(user) => {
+                    state.user = Some(username);
+                    state.config = Some(user.config);
+                    state.time_blocks = user.blocks;
+                }
+
+                None => {
+                    let user = self.storage.create(username.clone()).await.unwrap();
+                    state.user = Some(username);
+                    state.config = Some(user.config);
+                    state.time_blocks = user.blocks;
+                }
+            }
         }
     }
 }
