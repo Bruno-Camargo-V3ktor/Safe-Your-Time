@@ -2,7 +2,7 @@ use crate::{
     communication::Controller,
     service::{
         InitStateService, ListenerHttpService, ListenerSocketService, MonitoringAppsService,
-        ServiceController,
+        ServiceController, TimerService,
     },
     state_app::StateApp,
     storage::SurrealDbStorage,
@@ -28,6 +28,8 @@ async fn main() {
         InitStateService::new(state_app.clone(), storage.clone()),
         2500,
     );
+
+    services.add_service(TimerService::new(state_app.clone()), 1000);
 
     services.add_service(MonitoringAppsService::new(state_app.clone()), 5000);
     //services.add_service(FirewallService::new(state_app.clone()), 5000);
