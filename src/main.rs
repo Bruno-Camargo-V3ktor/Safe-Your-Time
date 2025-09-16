@@ -1,8 +1,8 @@
 use crate::{
     communication::Controller,
     service::{
-        FirewallService, ListenerHttpService, ListenerSocketService, MonitoringAppsService,
-        ServiceController, TimerService,
+        InitStateService, ListenerHttpService, ListenerSocketService, MonitoringAppsService,
+        ServiceController,
     },
     state_app::StateApp,
     storage::SurrealDbStorage,
@@ -24,10 +24,13 @@ async fn main() {
     let controller = Controller::new(storage.clone(), state_app.clone());
 
     let mut services = ServiceController::new();
-    services.add_service(TimerService::new(state_app.clone(), storage.clone()), 1000);
+    services.add_service(
+        InitStateService::new(state_app.clone(), storage.clone()),
+        2500,
+    );
 
     services.add_service(MonitoringAppsService::new(state_app.clone()), 5000);
-    services.add_service(FirewallService::new(state_app.clone()), 5000);
+    //services.add_service(FirewallService::new(state_app.clone()), 5000);
 
     services.add_service(
         ListenerSocketService::new(state_app.clone(), controller.clone()),

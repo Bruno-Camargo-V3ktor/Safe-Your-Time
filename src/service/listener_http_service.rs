@@ -32,7 +32,7 @@ impl ListenerHttpService {
 #[async_trait::async_trait]
 impl Service for ListenerHttpService {
     async fn exec(&mut self) {
-        let is_enable_http = if let Some(config) = &self.state.read().await.get_config() {
+        let is_enable_http = if let Some(config) = &self.state.read().await.config {
             config.http_listening
         } else {
             true
