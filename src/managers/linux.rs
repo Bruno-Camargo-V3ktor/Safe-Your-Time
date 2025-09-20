@@ -39,23 +39,11 @@ impl Manager for LinuxManager {
         Ok(())
     }
 
-    async fn firewall_block(&self, ip: String, rule_name: String) -> anyhow::Result<()> {
-        todo!()
-    }
-
-    async fn firewall_clean_all(&self) -> anyhow::Result<()> {
-        todo!()
-    }
-
-    async fn firewall_clean(&self, rule_name: String) -> anyhow::Result<()> {
-        todo!()
-    }
-
-    async fn domain_resolve(&self, domain: String) -> String {
-        todo!()
-    }
-
     async fn get_username(&self) -> anyhow::Result<String> {
+        todo!()
+    }
+
+    async fn notification(&self) -> anyhow::Result<()> {
         todo!()
     }
 }
