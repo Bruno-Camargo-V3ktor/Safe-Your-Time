@@ -28,5 +28,20 @@ impl Service for TimerService {
                 state.active_time_block = None;
             }
         }
+
+        if state.active_time_block.is_none() {
+            let time_blocks_for_day = state
+                .time_blocks
+                .iter()
+                .filter(|tb| tb.days.contains(&weekday))
+                .map(|tb| tb.clone())
+                .collect::<Vec<_>>();
+
+            for tb in time_blocks_for_day {
+                if tb.start_time >= actual_time && tb.start_time != tb.end_time {
+                    state.active_time_block = Some(tb.clone());
+                }
+            }
+        }
     }
 }

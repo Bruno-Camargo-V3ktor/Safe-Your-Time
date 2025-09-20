@@ -29,7 +29,7 @@ async fn main() {
         2500,
     );
 
-    services.add_service(TimerService::new(state_app.clone()), 1000);
+    services.add_service(TimerService::new(state_app.clone()), 10000);
 
     services.add_service(MonitoringAppsService::new(state_app.clone()), 5000);
     //services.add_service(FirewallService::new(state_app.clone()), 5000);
