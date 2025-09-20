@@ -1,4 +1,5 @@
-use super::{DayOfWeek, StateBlock, TimeRegister};
+use super::{StateBlock, TimeRegister};
+use chrono::Weekday;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
@@ -11,7 +12,7 @@ pub struct TimeBlock {
     pub end_time: TimeRegister,
     pub state: StateBlock,
 
-    pub days: HashSet<DayOfWeek>,
+    pub days: HashSet<Weekday>,
 
     pub denied_acess: Vec<String>,
     pub allow_acess: Vec<String>,
