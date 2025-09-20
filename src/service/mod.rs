@@ -19,11 +19,11 @@ pub trait Service {
     async fn exec(&mut self);
 }
 
-pub struct ServiceController {
+pub struct ServicePool {
     services: Vec<(Box<dyn Service + Send + Sync>, Duration)>,
 }
 
-impl ServiceController {
+impl ServicePool {
     pub fn new() -> Self {
         Self { services: vec![] }
     }

@@ -2,7 +2,7 @@ use crate::{
     communication::Controller,
     service::{
         InitStateService, ListenerHttpService, ListenerSocketService, MonitoringAppsService,
-        ServiceController, TimerService,
+        ServicePool, TimerService,
     },
     state_app::StateApp,
     storage::SurrealDbStorage,
@@ -23,7 +23,7 @@ async fn main() {
     let storage = SurrealDbStorage::new(&get_dir(), "sytd-ns", "sytd-db").await;
     let controller = Controller::new(storage.clone(), state_app.clone());
 
-    let mut services = ServiceController::new();
+    let mut services = ServicePool::new();
     services.add_service(
         InitStateService::new(state_app.clone(), storage.clone()),
         2500,
