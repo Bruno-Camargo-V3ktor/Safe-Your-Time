@@ -5,8 +5,8 @@
     window.blockerExecuted = true;
 
     try {
-        const { default: init, execute } = await import(
-            chrome.runtime.getURL("pkg/blocker_lib.js")
+        const {  default: init, execute } = await import(
+            chrome.runtime.getURL("pkg/syt_plugin_web.js")
         );
 
         await init();
