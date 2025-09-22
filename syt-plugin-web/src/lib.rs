@@ -1,5 +1,22 @@
-use wasm_bindgen::{ JsCast, JsValue };
+use wasm_bindgen::prelude::*;
 use web_sys::{ HtmlElement, window };
+
+#[wasm_bindgen]
+pub fn execute(url: &str) -> Result<(), JsValue> {
+    let blocked_list = get_blocked_sites();
+    if is_blocked(url, &blocked_list) {
+        create_block_overlay()?;
+    }
+    Ok(())
+}
+
+#[wasm_bindgen]
+pub fn is_url_blocked(url: &str) -> bool {
+    let blocked_list = get_blocked_sites();
+    is_blocked(url, &blocked_list)
+}
+
+/////////////////////
 
 fn get_blocked_sites() -> Vec<&'static str> {
     vec!["facebook.com", "twitter.com", "instagram.com", "tiktok.com"]
