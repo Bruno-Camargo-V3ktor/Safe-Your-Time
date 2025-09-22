@@ -1,0 +1,15 @@
+[package]
+name = "sytd"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+anyhow = { workspace = true }
+chrono = { workspace = true }
+async-trait = "0.1.89"
+surrealdb = { version = "2.3.7", features = ["kv-rocksdb", "kv-mem"] }
+sha1 = "0.10.6"
+actix-web = "4"

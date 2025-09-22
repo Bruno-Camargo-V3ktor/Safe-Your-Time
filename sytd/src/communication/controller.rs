@@ -1,5 +1,6 @@
-use super::{Responses, commands::Commands};
+use super::{Responses, TypeReponses, commands::Commands};
 use crate::{state_app::SharedStateApp, storage::SharedStorage};
+use serde_json::json;
 use std::sync::Arc;
 
 pub type SharedController = Arc<Controller>;
@@ -16,6 +17,12 @@ impl Controller {
     }
 
     pub async fn process(&self, command: Commands) -> Responses {
-        Responses::Success(String::from("Hi"))
+        match command {
+            _ => Responses::new(
+                TypeReponses::Error,
+                "commando not implemation".to_string(),
+                json!({}),
+            ),
+        }
     }
 }
