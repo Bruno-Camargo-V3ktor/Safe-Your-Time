@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Safe your Time",
+  "version": "1.0",
+  "description": "---",
+  
+  "permissions": [
+    "alarms",
+    "tabs",
+    "scripting"
+  ],
+
+  "background": {
+    "service_worker": "background.js"
+  },
+
+  "web_accessible_resources": [
+    {
+      "resources": ["pkg/*", "style.css", "content.js"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
