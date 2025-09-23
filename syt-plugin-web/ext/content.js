@@ -1,19 +1,19 @@
 (async () => {
-    if (window.blockerExecuted) {
-        return;
-    }
-    window.blockerExecuted = true;
+  try {
+    const { default: init, execute } = await import(
+      chrome.runtime.getURL('pkg/syt_plugin_web.js')
+    );
 
-    try {
-        const {  default: init, execute } = await import(
-            chrome.runtime.getURL("pkg/syt_plugin_web.js")
-        );
+    await init();
 
-        await init();
+    window.addEventListener('DOMContentLoaded', () => {
+        console.log("SYT Blocker: Página carregada, verificando URL.");
 
-        execute(window.location.href);
+        const currentUrl = window.location.href;
+        block_page(currentUrl);
+    });
 
-    } catch (e) {
-        console.error("Error: ", e);
-    }
+  } catch (e) {
+    console.error("Error:", e);
+  }
 })();
