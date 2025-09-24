@@ -1,4 +1,4 @@
-use serde::{Deserialize, Serialize};
+use serde::{ Deserialize, Serialize };
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct AppConfig {
@@ -7,7 +7,6 @@ pub struct AppConfig {
     pub default_denied_apps: Vec<String>,
     pub default_message: String,
     pub http_listening: bool,
-    pub firewall_block: bool,
 }
 
 impl AppConfig {
@@ -18,7 +17,6 @@ impl AppConfig {
             default_denied_apps: vec![],
             default_message: String::from("Focus!!!"),
             http_listening: true,
-            firewall_block: false,
         }
     }
 }

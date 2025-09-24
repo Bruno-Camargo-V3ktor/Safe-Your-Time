@@ -1,10 +1,5 @@
-use serde::{Deserialize, Serialize};
+use serde::{ Deserialize, Serialize };
 use serde_json::Value;
-
-pub enum TypeReponses {
-    Success,
-    Error,
-}
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(tag = "type", content = "content")]
@@ -20,16 +15,22 @@ pub struct ResponseContent {
 }
 
 impl Responses {
-    pub fn new<T: Serialize>(type_response: TypeReponses, message: String, payload: T) -> Self {
+    pub fn success<T: Serialize>(message: String, payload: T) -> Self {
         let content = ResponseContent {
             message,
             payload: serde_json::to_value(payload).unwrap(),
         };
 
-        match type_response {
-            TypeReponses::Success => Responses::Success(content),
-            TypeReponses::Error => Responses::Error(content),
-        }
+        Self::Success(content)
+    }
+
+    pub fn error<T: Serialize>(message: String, payload: T) -> Self {
+        let content = ResponseContent {
+            message,
+            payload: serde_json::to_value(payload).unwrap(),
+        };
+
+        Self::Error(content)
     }
 
     pub fn to_bytes(&self) -> Vec<u8> {

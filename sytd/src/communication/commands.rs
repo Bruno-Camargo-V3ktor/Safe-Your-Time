@@ -1,5 +1,5 @@
-use chrono::{DateTime, Duration, Local};
-use serde::{Deserialize, Serialize};
+use chrono::{ DateTime, Duration, Local };
+use serde::{ Deserialize, Serialize };
 
 pub async fn from_bytes(bytes: &[u8]) -> anyhow::Result<Commands> {
     let command: Commands = serde_json::from_slice(bytes)?;
@@ -9,19 +9,20 @@ pub async fn from_bytes(bytes: &[u8]) -> anyhow::Result<Commands> {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(tag = "command", content = "args")]
 pub enum Commands {
-    Create(CreateArgs),
-    Update(UpdateArgs),
-    Delete(DeleteArgs),
-    Status,
-    Start(StartArgs),
-    Stop(StopArgs),
-    Show(ShowArgs),
-    List,
-    Config(ConfigArgs),
+    CreateTimeBlock(CreateTimeBlockArgs),
+    UpdateTimeBlock(UpdateTimeBlockArgs),
+    DeleteTimeBlock(DeleteTimeBlockArgs),
+    StatusTimeBlock,
+    StartTimeBlock(StartTimeBlockArgs),
+    StopTimeBlock(StopTimeBlockArgs),
+    ShowTimeBlock(ShowTimeBlockArgs),
+    ListTimeBlocks,
+    ShowConfig,
+    UpdateConfig(UpdateConfigArgs),
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct CreateArgs {
+pub struct CreateTimeBlockArgs {
     name: String,
 
     duration: Option<Duration>,
@@ -40,7 +41,7 @@ pub struct CreateArgs {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct UpdateArgs {
+pub struct UpdateTimeBlockArgs {
     name: String,
 
     new_name: Option<String>,
@@ -61,24 +62,30 @@ pub struct UpdateArgs {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct DeleteArgs {
+pub struct DeleteTimeBlockArgs {
     name: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct StartArgs {
+pub struct StartTimeBlockArgs {
     name: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct StopArgs {
+pub struct StopTimeBlockArgs {
     name: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct ShowArgs {
+pub struct ShowTimeBlockArgs {
     name: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct ConfigArgs {}
+pub struct UpdateConfigArgs {
+    pub system_apps: Option<Vec<String>>,
+    pub default_denied_acess: Option<Vec<String>>,
+    pub default_denied_apps: Option<Vec<String>>,
+    pub default_message: Option<String>,
+    pub http_listening: Option<bool>,
+}
