@@ -1,56 +1,55 @@
 use wasm_bindgen::prelude::*;
-use web_sys::{ HtmlElement, window };
+use web_sys::{ console, window };
+use url::Url;
 
 #[wasm_bindgen]
 pub fn execute(url: &str) -> Result<(), JsValue> {
     let blocked_list = get_blocked_sites();
-    if is_blocked(url, &blocked_list) {
-        create_block_overlay()?;
-    }
-    Ok(())
-}
+    console::log_1(&url.to_string().into());
 
-#[wasm_bindgen]
-pub fn is_url_blocked(url: &str) -> bool {
-    let blocked_list = get_blocked_sites();
-    is_blocked(url, &blocked_list)
+    if is_blocked(url, &blocked_list) {
+        blocked_site()?;
+    }
+
+    Ok(())
 }
 
 /////////////////////
 
 fn get_blocked_sites() -> Vec<&'static str> {
-    vec!["facebook.com", "twitter.com", "instagram.com", "tiktok.com"]
+    vec!["www.facebook.com", "twitter.com", "www.instagram.com", "www.tiktok.com"]
 }
 
 fn is_blocked(url: &str, blocked_list: &[&str]) -> bool {
-    for site in blocked_list {
-        if url.contains(site) {
-            return true;
+    match Url::parse(url) {
+        Ok(paser_url) => {
+            let host_src = paser_url.host_str().unwrap_or("");
+
+            if blocked_list.contains(&host_src) {
+                return true;
+            }
+            return false;
+        }
+        Err(_) => {
+            return false;
         }
     }
-    false
 }
 
-fn create_block_overlay() -> Result<(), JsValue> {
+fn blocked_site() -> Result<(), JsValue> {
     let window = window().unwrap();
     let document = window.document().unwrap();
     let body = document.body().unwrap();
 
-    if document.get_element_by_id("site-blocker-overlay").is_some() {
-        return Ok(());
-    }
+    body.set_inner_html("");
 
-    let overlay = document.create_element("div")?;
-    overlay.set_id("site-block-overlay");
-    overlay.set_inner_html(r#"
-        <h1>Site Blocked</h1>
-    "#);
+    let div = document.create_element("div")?;
+    div.set_id("blocker-div");
+    div.set_inner_html("<h1>Blocked Access</h1>");
 
-    body.append_child(&overlay)?;
-    let _ = window.stop();
+    body.append_child(&div)?;
 
-    let body_html: HtmlElement = body.dyn_into()?;
-    body_html.style().set_property("overflow", "hidden")?;
+    console::log_1(&"fim da funcao de overlay".into());
 
     Ok(())
 }
