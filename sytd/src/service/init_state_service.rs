@@ -4,7 +4,6 @@ use crate::{
     state_app::SharedStateApp,
     storage::SharedStorage,
 };
-
 use super::Service;
 
 pub struct InitStateService {
@@ -23,6 +22,15 @@ impl InitStateService {
             Err(_) => None,
         }
     }
+
+    async fn create_user_by_no_exist(&self, username: String) -> User {
+        if let Some(user) = self.get_user_by_username(username.clone()).await {
+            user
+        } else {
+            let user = self.storage.create(username.clone()).await.unwrap();
+            user
+        }
+    }
 }
 
 #[async_trait::async_trait]
@@ -32,27 +40,27 @@ impl Service for InitStateService {
         let system_user = manager.get_username().await.ok();
         let mut state = self.state.write().await;
 
-        if system_user.is_none() && state.user.is_some() {
-            state.clear_state();
-            return;
-        }
+        match ( state.user.clone(), system_user ) {
+            (None, Some(username)) => {
+                let new_user = self.create_user_by_no_exist(username.clone()).await;
+                state.user = Some(new_user);
+                state.active_time_blocks = vec![];
+            }
 
-        if (state.user != system_user) && system_user.is_some() {
-            let username = system_user.unwrap();
-            match self.get_user_by_username(username.clone()).await {
-                Some(user) => {
-                    state.user = Some(username);
-                    state.config = Some(user.config);
-                    state.time_blocks = user.blocks;
-                }
-
-                None => {
-                    let user = self.storage.create(username.clone()).await.unwrap();
-                    state.user = Some(username);
-                    state.config = Some(user.config);
-                    state.time_blocks = user.blocks;
+            (Some(user), Some(username)) => {
+                if user.username != username {
+                    let new_user = self.create_user_by_no_exist(username.clone()).await;
+                    state.user = Some(new_user);
+                    state.active_time_blocks = vec![];
                 }
             }
+
+            (Some(_), None) => {
+                state.clear_state();
+            }
+
+            _ => {}
         }
+
     }
 }
