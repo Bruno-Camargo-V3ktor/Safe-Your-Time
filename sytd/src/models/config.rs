@@ -6,7 +6,6 @@ pub struct AppConfig {
     pub default_denied_acess: Vec<String>,
     pub default_denied_apps: Vec<String>,
     pub default_message: String,
-    pub http_listening: bool,
 }
 
 impl AppConfig {
@@ -16,7 +15,6 @@ impl AppConfig {
             default_denied_acess: vec![],
             default_denied_apps: vec![],
             default_message: String::from("Focus!!!"),
-            http_listening: true,
         }
     }
 }

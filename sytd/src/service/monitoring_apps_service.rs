@@ -1,6 +1,7 @@
 use super::Service;
 use crate::{
     managers::{Manager, get_manager},
+    models::StateBlock,
     state_app::SharedStateApp,
 };
 
@@ -18,10 +19,15 @@ impl MonitoringAppsService {
 impl Service for MonitoringAppsService {
     async fn exec(&mut self) {
         let app_state = self.state.read().await;
-        if let Some(config) = &app_state.config {
-            if let Some(time_block) = &app_state.active_time_block {
+
+        if let Some(user) = &app_state.user {
+            for time_block in &app_state.active_time_blocks {
+                if time_block.state != StateBlock::InProgress {
+                    continue;
+                }
+
                 let mut apps = time_block.denied_apps.clone();
-                apps.append(&mut config.default_denied_apps.clone());
+                apps.append(&mut user.config.default_denied_apps.clone());
                 get_manager().monitoring_apps(apps).await;
             }
         }

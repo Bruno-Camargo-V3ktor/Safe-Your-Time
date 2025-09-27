@@ -1,5 +1,5 @@
-use super::{ Responses, commands::Commands };
-use crate::{ models::TimeBlock, state_app::SharedStateApp, storage::SharedStorage };
+use super::{Responses, commands::Commands};
+use crate::{state_app::SharedStateApp, storage::SharedStorage};
 use serde_json::json;
 use std::sync::Arc;
 
@@ -22,12 +22,8 @@ impl Controller {
                 let mut state = self.state.write().await;
                 let storage = self.storage.clone();
 
-                let new_time_block = TimeBlock {
-                    ..args
-                };
-
-                 Responses::error("commando not implemation".to_string(), json!({}))
-            },
+                Responses::error("commando not implemation".to_string(), json!({}))
+            }
 
             _ => Responses::error("commando not implemation".to_string(), json!({})),
         }

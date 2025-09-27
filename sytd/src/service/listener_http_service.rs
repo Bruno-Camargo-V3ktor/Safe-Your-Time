@@ -32,25 +32,15 @@ impl ListenerHttpService {
 #[async_trait::async_trait]
 impl Service for ListenerHttpService {
     async fn exec(&mut self) {
-        let is_enable_http = if let Some(config) = &self.state.read().await.config {
-            config.http_listening
-        } else {
-            true
-        };
-
         match &self.server_handle {
             Some(handle) => {
-                if is_enable_http && handle.is_finished() {
+                if handle.is_finished() {
                     self.start_server();
-                } else if !is_enable_http {
-                    handle.abort();
                 }
             }
 
             None => {
-                if is_enable_http {
-                    self.start_server();
-                }
+                self.start_server();
             }
         };
     }
