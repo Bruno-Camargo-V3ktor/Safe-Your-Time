@@ -23,62 +23,62 @@ pub enum Commands {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CreateTimeBlockArgs {
-    name: String,
+    pub name: String,
 
-    duration: Option<Duration>,
-    start_time: Option<DateTime<Local>>,
-    end_time: Option<DateTime<Local>>,
+    pub duration: Option<Duration>,
+    pub start_time: Option<DateTime<Local>>,
+    pub end_time: Option<DateTime<Local>>,
 
-    message: Option<String>,
+    pub message: Option<String>,
 
-    denied_web: Option<Vec<String>>,
-    allow_web: Option<Vec<String>>,
+    pub denied_web: Option<Vec<String>>,
+    pub allow_web: Option<Vec<String>>,
 
-    denied_apps: Option<Vec<String>>,
-    allow_apps: Option<Vec<String>>,
+    pub denied_apps: Option<Vec<String>>,
+    pub allow_apps: Option<Vec<String>>,
 
-    days: Option<String>,
+    pub days: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UpdateTimeBlockArgs {
-    name: String,
+    pub name: String,
 
-    new_name: Option<String>,
+    pub new_name: Option<String>,
 
-    duration: Option<Duration>,
-    start_time: Option<DateTime<Local>>,
-    end_time: Option<DateTime<Local>>,
+    pub duration: Option<Duration>,
+    pub start_time: Option<DateTime<Local>>,
+    pub end_time: Option<DateTime<Local>>,
 
-    message: Option<String>,
+    pub message: Option<String>,
 
-    denied_web: Option<Vec<String>>,
-    allow_web: Option<Vec<String>>,
+    pub denied_web: Option<Vec<String>>,
+    pub allow_web: Option<Vec<String>>,
 
-    denied_apps: Option<Vec<String>>,
-    allow_apps: Option<Vec<String>>,
+    pub denied_apps: Option<Vec<String>>,
+    pub allow_apps: Option<Vec<String>>,
 
-    days: Option<String>,
+    pub days: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct DeleteTimeBlockArgs {
-    name: String,
+    pub name: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct StartTimeBlockArgs {
-    name: String,
+    pub name: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct StopTimeBlockArgs {
-    name: String,
+    pub name: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ShowTimeBlockArgs {
-    name: String,
+    pub name: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
