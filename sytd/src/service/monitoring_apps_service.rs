@@ -1,9 +1,7 @@
+use std::collections::HashSet;
+
 use super::Service;
-use crate::{
-    managers::{Manager, get_manager},
-    models::StateBlock,
-    state_app::SharedStateApp,
-};
+use crate::{ managers::{ Manager, get_manager }, models::StateBlock, state_app::SharedStateApp };
 
 pub struct MonitoringAppsService {
     state: SharedStateApp,
@@ -28,6 +26,10 @@ impl Service for MonitoringAppsService {
 
                 let mut apps = time_block.denied_apps.clone();
                 apps.append(&mut user.config.default_denied_apps.clone());
+
+                let remove_set: HashSet<_> = time_block.allow_apps.clone().into_iter().collect();
+                apps.retain(|x| !remove_set.contains(x));
+
                 get_manager().monitoring_apps(apps).await;
             }
         }
