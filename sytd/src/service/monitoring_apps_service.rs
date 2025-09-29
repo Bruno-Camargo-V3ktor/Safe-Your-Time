@@ -21,7 +21,7 @@ impl Service for MonitoringAppsService {
         let app_state = self.state.read().await;
 
         if let Some(user) = &app_state.user {
-            for time_block in &app_state.active_time_blocks {
+            for (_, time_block) in &app_state.active_time_blocks {
                 if time_block.state != StateBlock::InProgress {
                     continue;
                 }

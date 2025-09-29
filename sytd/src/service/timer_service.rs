@@ -1,8 +1,8 @@
-use chrono::{Datelike, Local, Timelike};
-
-use crate::{models::TimeRegister, state_app::SharedStateApp};
+use std::collections::HashMap;
 
 use super::Service;
+use crate::{models::TimeRegister, state_app::SharedStateApp};
+use chrono::{Datelike, Local, Timelike};
 
 pub struct TimerService {
     state: SharedStateApp,
@@ -23,25 +23,20 @@ impl Service for TimerService {
             TimeRegister::new(now_time.hour() as u8, now_time.minute() as u8).unwrap();
 
         let mut state = self.state.write().await;
-        if let Some(timeblock) = &state.active_time_block {
-            if actual_time >= timeblock.end_time {
-                state.active_time_block = None;
-            }
+
+        if state.user.is_none() {
+            return;
         }
 
-        if state.active_time_block.is_none() {
-            let time_blocks_for_day = state
-                .time_blocks
-                .iter()
-                .filter(|tb| tb.days.contains(&weekday))
-                .map(|tb| tb.clone())
-                .collect::<Vec<_>>();
+        let time_blocks_for_day = state
+            .active_time_blocks
+            .iter()
+            .filter(|(_, tb)| tb.days.contains(&weekday))
+            .map(|(_, tb)| tb.clone())
+            .collect::<Vec<_>>();
 
-            for tb in time_blocks_for_day {
-                if tb.start_time >= actual_time && tb.start_time != tb.end_time {
-                    state.active_time_block = Some(tb.clone());
-                }
-            }
-        }
+        state.active_time_blocks.retain(|_, tb| {
+            return true;
+        });
     }
 }

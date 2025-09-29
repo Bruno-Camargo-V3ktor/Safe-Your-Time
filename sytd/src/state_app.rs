@@ -1,19 +1,19 @@
-use crate::models::{User, TimeBlock};
-use std::{sync::Arc, vec};
+use crate::models::{TimeBlock, User};
+use std::{collections::HashMap, sync::Arc};
 use tokio::sync::RwLock;
 
 pub type SharedStateApp = Arc<RwLock<StateApp>>;
 
 pub struct StateApp {
     pub user: Option<User>,
-    pub active_time_blocks: Vec<TimeBlock>,
+    pub active_time_blocks: HashMap<String, TimeBlock>,
 }
 
 impl StateApp {
     pub fn new() -> Arc<RwLock<Self>> {
         let state = Self {
             user: None,
-            active_time_blocks: vec![],
+            active_time_blocks: HashMap::new(),
         };
 
         Arc::new(RwLock::new(state))

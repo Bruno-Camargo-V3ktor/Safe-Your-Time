@@ -1,10 +1,12 @@
+use std::collections::HashMap;
+
+use super::Service;
 use crate::{
     managers::{Manager, get_manager},
     models::User,
     state_app::SharedStateApp,
     storage::SharedStorage,
 };
-use super::Service;
 
 pub struct InitStateService {
     state: SharedStateApp,
@@ -40,18 +42,18 @@ impl Service for InitStateService {
         let system_user = manager.get_username().await.ok();
         let mut state = self.state.write().await;
 
-        match ( state.user.clone(), system_user ) {
+        match (state.user.clone(), system_user) {
             (None, Some(username)) => {
                 let new_user = self.create_user_by_no_exist(username.clone()).await;
                 state.user = Some(new_user);
-                state.active_time_blocks = vec![];
+                state.active_time_blocks = HashMap::new();
             }
 
             (Some(user), Some(username)) => {
                 if user.username != username {
                     let new_user = self.create_user_by_no_exist(username.clone()).await;
                     state.user = Some(new_user);
-                    state.active_time_blocks = vec![];
+                    state.active_time_blocks = HashMap::new();
                 }
             }
 
@@ -61,6 +63,5 @@ impl Service for InitStateService {
 
             _ => {}
         }
-
     }
 }
