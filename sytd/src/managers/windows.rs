@@ -1,3 +1,6 @@
+use std::process::Stdio;
+
+use anyhow::anyhow;
 use tokio::process::Command;
 
 use super::Manager;
@@ -38,14 +41,24 @@ impl Manager for WindowsManager {
         Command::new("taskkill")
             .args(["/PID", &id_process, "/F"])
             .stdout(std::process::Stdio::null())
-            .status()
-            .await?;
+            .status().await?;
 
         Ok(())
     }
 
     async fn get_username(&self) -> anyhow::Result<String> {
-        todo!()
+        let output = Command::new("whoami")
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .output().await?;
+
+        if output.status.success() {
+            let username = String::from_utf8(output.stdout)?.trim().to_string();
+            Ok(username)
+        } else {
+            let error_message = String::from_utf8(output.stderr)?;
+            Err(anyhow!(error_message))
+        }
     }
 
     async fn notification(&self) -> anyhow::Result<()> {
