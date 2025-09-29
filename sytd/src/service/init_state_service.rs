@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use super::Service;
 use crate::{
-    managers::{Manager, get_manager},
+    managers::{ Manager, get_manager },
     models::User,
     state_app::SharedStateApp,
     storage::SharedStorage,
@@ -45,6 +45,7 @@ impl Service for InitStateService {
         match (state.user.clone(), system_user) {
             (None, Some(username)) => {
                 let new_user = self.create_user_by_no_exist(username.clone()).await;
+
                 state.user = Some(new_user);
                 state.active_time_blocks = HashMap::new();
             }

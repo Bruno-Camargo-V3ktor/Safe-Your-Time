@@ -29,10 +29,10 @@ async fn main() {
 
     let mut services = ServicePool::new();
 
-    services.add_service(InitStateService::new(state_app.clone(), storage.clone()), 2500);
-    services.add_service(TimerService::new(state_app.clone()), 10000);
+    services.add_service(InitStateService::new(state_app.clone(), storage.clone()), 5000);
+    services.add_service(TimerService::new(state_app.clone()), 2500);
     services.add_service(MonitoringAppsService::new(state_app.clone()), 5000);
-    services.add_service(ListenerSocketService::new(state_app.clone(), controller.clone()), 5000);
+    services.add_service(ListenerSocketService::new(state_app.clone(), controller.clone()), 10000);
     services.add_service(ListenerHttpService::new(state_app.clone(), controller.clone()), 10000);
 
     services.init().await;
