@@ -62,7 +62,7 @@ impl Storage for JsonStorage {
 
         let user_id = hash_username(username.clone());
         let new_user = User {
-            blocks: vec![],
+            blocks: HashMap::new(),
             username,
             config: AppConfig::default_configs(),
         };
