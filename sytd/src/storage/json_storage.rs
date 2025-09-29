@@ -16,6 +16,7 @@ impl JsonStorage {
 
         if !full_path.is_file() {
             File::create(&full_path).unwrap();
+            let _ = fs::write(&full_path, "{}");
         }
 
         Arc::new(Self {
