@@ -11,7 +11,7 @@ pub trait Manager {
 
     async fn get_username(&self) -> anyhow::Result<String>;
 
-    async fn notification(&self) -> anyhow::Result<()>;
+    async fn notification(&self, title: String, body: String) -> anyhow::Result<()>;
 }
 
 #[cfg(target_os = "windows")]

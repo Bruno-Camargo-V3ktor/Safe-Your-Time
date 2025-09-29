@@ -15,7 +15,7 @@ impl Manager for MacOsManager {
         todo!()
     }
 
-    async fn notification(&self) -> anyhow::Result<()> {
+    async fn notification(&self, title: String, body: String) -> anyhow::Result<()> {
         todo!()
     }
 }

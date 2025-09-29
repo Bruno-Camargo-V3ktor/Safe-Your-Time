@@ -6,11 +6,7 @@ pub struct LinuxManager {}
 
 impl Manager for LinuxManager {
     async fn monitoring_apps(&self, apps: Vec<String>) {
-        let output = Command::new("top")
-            .args(["-b", "-n", "1"])
-            .output()
-            .await
-            .unwrap();
+        let output = Command::new("top").args(["-b", "-n", "1"]).output().await.unwrap();
 
         if output.status.success() {
             let stdout = String::from_utf8_lossy(&output.stdout);
@@ -31,10 +27,7 @@ impl Manager for LinuxManager {
     }
 
     async fn kill_process(&self, id_process: String) -> anyhow::Result<()> {
-        Command::new("kill")
-            .args(["-9", &id_process])
-            .status()
-            .await?;
+        Command::new("kill").args(["-9", &id_process]).status().await?;
 
         Ok(())
     }
@@ -43,7 +36,7 @@ impl Manager for LinuxManager {
         todo!()
     }
 
-    async fn notification(&self) -> anyhow::Result<()> {
+    async fn notification(&self, title: String, body: String) -> anyhow::Result<()> {
         todo!()
     }
 }
