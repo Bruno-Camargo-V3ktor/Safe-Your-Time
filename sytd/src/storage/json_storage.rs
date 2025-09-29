@@ -53,8 +53,9 @@ impl Storage for JsonStorage {
 
     async fn load(&self, username: String) -> anyhow::Result<Option<User>> {
         let users = self.open_file().await?;
+        let user_id: String = hash_username(username);
 
-        Ok(users.get(&username).cloned())
+        Ok(users.get(&user_id).cloned())
     }
 
     async fn create(&self, username: String) -> anyhow::Result<User> {
