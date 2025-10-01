@@ -1,6 +1,9 @@
 use super::Service;
-use crate::{ models::{ StateBlock, TimeRegister }, state_app::SharedStateApp };
-use chrono::{ Datelike, Local, Timelike };
+use crate::{
+    models::{StateBlock, TimeRegister},
+    state_app::SharedStateApp,
+};
+use chrono::{Datelike, Local, Timelike};
 
 pub struct TimerService {
     state: SharedStateApp,
@@ -17,10 +20,8 @@ impl Service for TimerService {
     async fn exec(&mut self) {
         let now_time = Local::now();
         let weekday = now_time.weekday();
-        let actual_time = TimeRegister::new(
-            now_time.hour() as u8,
-            now_time.minute() as u8
-        ).unwrap();
+        let actual_time =
+            TimeRegister::new(now_time.hour() as u8, now_time.minute() as u8).unwrap();
 
         let mut state = self.state.write().await;
         if state.user.is_none() {
@@ -32,11 +33,8 @@ impl Service for TimerService {
                 return false;
             }
 
-            if
-                tb.state == StateBlock::Idle &&
-                tb.start_time <= actual_time &&
-                tb.end_time >= actual_time
-            {
+            let entry_time = tb.start_time <= actual_time && tb.end_time >= actual_time;
+            if tb.state == StateBlock::Idle && entry_time {
                 tb.state = StateBlock::InProgress;
             }
 
@@ -44,7 +42,8 @@ impl Service for TimerService {
         });
 
         let user = state.user.as_ref().unwrap();
-        let time_blocks_for_day = user.blocks
+        let time_blocks_for_day = user
+            .blocks
             .iter()
             .filter(|(_, tb)| tb.days.contains(&weekday))
             .map(|(_, tb)| tb.clone())
