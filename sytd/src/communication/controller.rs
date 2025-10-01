@@ -28,10 +28,10 @@ impl Controller {
     }
 
     async fn create_time_block(&self, args: CreateTimeBlockArgs) -> Responses {
-        let state = self.state.write().await;
+        let mut state = self.state.write().await;
         let storage = self.storage.clone();
 
-        if let Some(user) = state.user.as_ref() {
+        if let Some(user) = state.user.as_mut() {
             if user.blocks.contains_key(&args.name) {
                 return Responses::error(
                     "There is already a time block with that name".to_string(),
@@ -49,7 +49,11 @@ impl Controller {
             tb_builder.days(args.days);
 
             return match tb_builder.build() {
-                Ok(tb) => Responses::success("TimeBlock created successfully".to_string(), tb),
+                Ok(tb) => {
+                    user.blocks.insert(tb.name.clone(), tb.clone());
+                    let _ = storage.save(user).await;
+                    Responses::success("TimeBlock created successfully".to_string(), tb)
+                }
                 Err(msg) => Responses::error(msg, json!({})),
             };
         }
