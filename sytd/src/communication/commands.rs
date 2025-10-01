@@ -1,5 +1,7 @@
-use chrono::{ DateTime, Duration, Local };
-use serde::{ Deserialize, Serialize };
+use chrono::{DateTime, Duration, Local, Weekday};
+use serde::{Deserialize, Serialize};
+
+use crate::models::TimeRegister;
 
 pub async fn from_bytes(bytes: &[u8]) -> anyhow::Result<Commands> {
     let command: Commands = serde_json::from_slice(bytes)?;
@@ -25,19 +27,19 @@ pub enum Commands {
 pub struct CreateTimeBlockArgs {
     pub name: String,
 
-    pub duration: Option<Duration>,
-    pub start_time: Option<DateTime<Local>>,
-    pub end_time: Option<DateTime<Local>>,
+    pub duration: Option<TimeRegister>,
+    pub start_time: Option<TimeRegister>,
+    pub end_time: Option<TimeRegister>,
 
     pub message: Option<String>,
 
-    pub denied_web: Option<Vec<String>>,
-    pub allow_web: Option<Vec<String>>,
+    pub denied_web: Vec<String>,
+    pub allow_web: Vec<String>,
 
-    pub denied_apps: Option<Vec<String>>,
-    pub allow_apps: Option<Vec<String>>,
+    pub denied_apps: Vec<String>,
+    pub allow_apps: Vec<String>,
 
-    pub days: Option<String>,
+    pub days: Vec<Weekday>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
