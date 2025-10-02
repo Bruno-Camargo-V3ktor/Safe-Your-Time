@@ -101,6 +101,12 @@ impl TimeBlockBuilder {
     }
 
     pub fn build(self) -> Result<TimeBlock, String> {
+        if self.set_duration && (self.set_start_time || self.set_end_time) {
+            return Err(String::from(
+                "You cannot set a duration along with a start time or an end time in a time block.",
+            ));
+        }
+
         Ok(self.time_block)
     }
 }
