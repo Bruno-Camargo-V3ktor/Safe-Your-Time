@@ -151,7 +151,10 @@ impl Controller {
         let state = self.state.read().await;
 
         if let Some(user) = state.user.as_ref() {
-            let list = user.blocks.iter().map(|(_, tb)| tb).collect::<Vec<_>>();
+            let mut blocks: std::collections::HashMap<String, TimeBlock> = user.blocks.clone();
+            blocks.extend(state.active_time_blocks.clone());
+
+            let list = blocks.iter().map(|(_, tb)| tb).collect::<Vec<_>>();
             Responses::success("Success".to_string(), list);
         }
 
