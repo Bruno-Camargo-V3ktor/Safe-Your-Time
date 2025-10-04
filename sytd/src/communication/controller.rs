@@ -33,6 +33,8 @@ impl Controller {
             Commands::ListTimeBlocks => self.list_all_time_blocks().await,
             Commands::ShowActiveTimeBlocks => self.list_active_time_blocks().await,
 
+            Commands::ShowConfig => self.get_cofig().await,
+
             _ => Responses::error("commando not implemation".to_string(), json!({})),
         }
     }
@@ -174,5 +176,16 @@ impl Controller {
             .filter(|tb| tb.state == StateBlock::InProgress)
             .collect::<Vec<_>>();
         Responses::success("Success".to_string(), list)
+    }
+
+    async fn get_cofig(&self) -> Responses {
+        let state = self.state.read().await;
+
+        if let Some(user) = state.user.as_ref() {
+            let config = &user.config;
+            Responses::success("Success".to_string(), config);
+        }
+
+        Responses::error("No user logged in".to_string(), json!({}))
     }
 }
