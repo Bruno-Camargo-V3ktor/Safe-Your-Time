@@ -14,10 +14,14 @@ pub enum Commands {
     CreateTimeBlock(CreateTimeBlockArgs),
     UpdateTimeBlock(UpdateTimeBlockArgs),
     DeleteTimeBlock(DeleteTimeBlockArgs),
+    ShowTimeBlock(ShowTimeBlockArgs),
+
+    ListTimeBlocks,
+    ShowActiveTimeBlocks,
+
     StartTimeBlock(StartTimeBlockArgs),
     StopTimeBlock(StopTimeBlockArgs),
-    ShowTimeBlock(ShowTimeBlockArgs),
-    ListTimeBlocks,
+
     ShowConfig,
     UpdateConfig(UpdateConfigArgs),
 }
@@ -83,9 +87,7 @@ pub struct ShowTimeBlockArgs {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UpdateConfigArgs {
-    pub system_apps: Option<Vec<String>>,
-    pub default_denied_acess: Option<Vec<String>>,
-    pub default_denied_apps: Option<Vec<String>>,
-    pub default_message: Option<String>,
-    pub http_listening: Option<bool>,
+    pub default_denied_acess: Vec<String>,
+    pub default_denied_apps: Vec<String>,
+    pub default_message: String,
 }
