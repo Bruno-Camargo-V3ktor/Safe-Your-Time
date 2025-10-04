@@ -25,7 +25,7 @@ impl Controller {
         match command {
             Commands::CreateTimeBlock(args) => self.create_time_block(args).await,
             Commands::UpdateTimeBlock(args) => self.update_time_block(args).await,
-            Commands::DeleteTimeBlock(args) => 
+            Commands::DeleteTimeBlock(args) => self.delete_time_block(args).await,
 
             _ => Responses::error("commando not implemation".to_string(), json!({})),
         }
@@ -108,6 +108,7 @@ impl Controller {
     async fn delete_time_block(&self, args: DeleteTimeBlockArgs) -> Responses {
         let mut state = self.state.write().await;
         let storage = self.storage.clone();
+        let mut success_deleted = false;
 
         if let Some(user) = state.user.as_mut() {
             if !user.blocks.contains_key(&args.name) {
@@ -115,12 +116,15 @@ impl Controller {
             }
 
             let _ = user.blocks.remove(&args.name);
-            let _ = state.active_time_blocks.remove(&args.name);
-
             let _ = storage.save(user).await;
-            return Responses::success("TimeBlock deleted successfully".to_string(), json!({}));
+            success_deleted = true;
         }
 
-        Responses::error("No user logged in".to_string(), json!({}))
+        if success_deleted {
+            let _ = state.active_time_blocks.remove(&args.name);
+            Responses::success("TimeBlock deleted successfully".to_string(), json!({}))
+        } else {
+            Responses::error("No user logged in".to_string(), json!({}))
+        }
     }
 }
