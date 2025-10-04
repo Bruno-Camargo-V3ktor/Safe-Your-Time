@@ -1,20 +1,15 @@
 use super::Service;
-use crate::{
-    communication::{Listener, ListenerSockter, SharedController},
-    state_app::SharedStateApp,
-};
+use crate::communication::{Listener, ListenerSockter, SharedController};
 use tokio::task::JoinHandle;
 
 pub struct ListenerSocketService {
-    state: SharedStateApp,
     controller: SharedController,
     handle_server: Option<JoinHandle<()>>,
 }
 
 impl ListenerSocketService {
-    pub fn new(state_app: SharedStateApp, controller: SharedController) -> Self {
+    pub fn new(controller: SharedController) -> Self {
         Self {
-            state: state_app,
             controller,
             handle_server: None,
         }

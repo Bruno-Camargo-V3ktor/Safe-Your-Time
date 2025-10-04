@@ -1,20 +1,15 @@
 use super::Service;
-use crate::{
-    communication::{Listener, ListenerHttp, SharedController},
-    state_app::SharedStateApp,
-};
+use crate::communication::{Listener, ListenerHttp, SharedController};
 use tokio::task::JoinHandle;
 
 pub struct ListenerHttpService {
-    state: SharedStateApp,
     controller: SharedController,
     server_handle: Option<JoinHandle<()>>,
 }
 
 impl ListenerHttpService {
-    pub fn new(state: SharedStateApp, controller: SharedController) -> Self {
+    pub fn new(controller: SharedController) -> Self {
         Self {
-            state,
             controller,
             server_handle: None,
         }
