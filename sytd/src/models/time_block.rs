@@ -67,8 +67,10 @@ impl TimeBlockBuilder {
     pub fn duration(&mut self, duration: Option<TimeRegister>) {
         if let Some(time) = duration {
             self.time_block.duration = time;
+
             self.time_block.start_time = TimeRegister::new(0, 0).unwrap();
             self.time_block.end_time = TimeRegister::new(0, 0).unwrap();
+
             self.set_duration = true;
         } else {
             self.time_block.duration = TimeRegister::new(0, 0).unwrap();
@@ -109,6 +111,14 @@ impl TimeBlockBuilder {
             return Err(String::from(
                 "You need to define a start time and an end time.",
             ));
+        }
+
+        if self.set_start_time && self.set_end_time {
+            if self.time_block.start_time < self.time_block.end_time {
+                return Err(String::from(
+                    "The end time must be greater than the start time.",
+                ));
+            }
         }
 
         Ok(self.time_block)
