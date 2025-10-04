@@ -30,6 +30,8 @@ impl Controller {
             Commands::DeleteTimeBlock(args) => self.delete_time_block(args).await,
             Commands::ShowTimeBlock(args) => self.get_time_bock(args).await,
 
+            Commands::ListTimeBlocks => self.list_all_time_blocks().await,
+
             _ => Responses::error("commando not implemation".to_string(), json!({})),
         }
     }
@@ -139,6 +141,17 @@ impl Controller {
                 Some(tb) => Responses::success("Success".to_string(), tb),
                 None => Responses::error("Time block not found".to_string(), json!({})),
             };
+        }
+
+        Responses::error("No user logged in".to_string(), json!({}))
+    }
+
+    async fn list_all_time_blocks(&self) -> Responses {
+        let mut state = self.state.write().await;
+
+        if let Some(user) = state.user.as_mut() {
+            let list = user.blocks.iter().map(|(_, tb)| tb).collect::<Vec<_>>();
+            Responses::success("Success".to_string(), list);
         }
 
         Responses::error("No user logged in".to_string(), json!({}))
