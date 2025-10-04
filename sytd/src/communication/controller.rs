@@ -3,7 +3,7 @@ use crate::{
     communication::{
         CreateTimeBlockArgs, DeleteTimeBlockArgs, ShowTimeBlockArgs, UpdateTimeBlockArgs,
     },
-    models::TimeBlock,
+    models::{StateBlock, TimeBlock},
     state_app::SharedStateApp,
     storage::SharedStorage,
 };
@@ -31,6 +31,7 @@ impl Controller {
             Commands::ShowTimeBlock(args) => self.get_time_bock(args).await,
 
             Commands::ListTimeBlocks => self.list_all_time_blocks().await,
+            Commands::ShowActiveTimeBlocks => self.list_active_time_blocks().await,
 
             _ => Responses::error("commando not implemation".to_string(), json!({})),
         }
@@ -134,9 +135,9 @@ impl Controller {
     }
 
     async fn get_time_bock(&self, args: ShowTimeBlockArgs) -> Responses {
-        let mut state = self.state.write().await;
+        let state = self.state.read().await;
 
-        if let Some(user) = state.user.as_mut() {
+        if let Some(user) = state.user.as_ref() {
             return match user.blocks.get(&args.name) {
                 Some(tb) => Responses::success("Success".to_string(), tb),
                 None => Responses::error("Time block not found".to_string(), json!({})),
@@ -147,13 +148,28 @@ impl Controller {
     }
 
     async fn list_all_time_blocks(&self) -> Responses {
-        let mut state = self.state.write().await;
+        let state = self.state.read().await;
 
-        if let Some(user) = state.user.as_mut() {
+        if let Some(user) = state.user.as_ref() {
             let list = user.blocks.iter().map(|(_, tb)| tb).collect::<Vec<_>>();
             Responses::success("Success".to_string(), list);
         }
 
         Responses::error("No user logged in".to_string(), json!({}))
+    }
+
+    async fn list_active_time_blocks(&self) -> Responses {
+        let state = self.state.read().await;
+        if state.user.is_none() {
+            return Responses::error("No user logged in".to_string(), json!({}));
+        }
+
+        let list = state
+            .active_time_blocks
+            .iter()
+            .map(|(_, tb)| tb)
+            .filter(|tb| tb.state == StateBlock::InProgress)
+            .collect::<Vec<_>>();
+        Responses::success("Success".to_string(), list)
     }
 }
