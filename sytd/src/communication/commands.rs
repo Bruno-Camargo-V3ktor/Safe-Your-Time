@@ -20,6 +20,7 @@ pub enum Commands {
     ShowActiveTimeBlocks,
 
     StartTimeBlock(StartTimeBlockArgs),
+    PauseTimeBlock(PauseTimeBlockArgs),
     StopTimeBlock(StopTimeBlockArgs),
 
     ShowConfig,
@@ -72,6 +73,11 @@ pub struct DeleteTimeBlockArgs {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct StartTimeBlockArgs {
+    pub name: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct PauseTimeBlockArgs {
     pub name: String,
 }
 

@@ -1,7 +1,8 @@
 use super::{Responses, commands::Commands};
 use crate::{
     communication::{
-        CreateTimeBlockArgs, DeleteTimeBlockArgs, ShowTimeBlockArgs, UpdateTimeBlockArgs,
+        CreateTimeBlockArgs, DeleteTimeBlockArgs, PauseTimeBlockArgs, ShowTimeBlockArgs,
+        UpdateConfigArgs, UpdateTimeBlockArgs,
     },
     models::{StateBlock, TimeBlock},
     state_app::SharedStateApp,
@@ -33,7 +34,10 @@ impl Controller {
             Commands::ListTimeBlocks => self.list_all_time_blocks().await,
             Commands::ShowActiveTimeBlocks => self.list_active_time_blocks().await,
 
+            Commands::PauseTimeBlock(args) => self.toggle_pause_time_block(args).await,
+
             Commands::ShowConfig => self.get_cofig().await,
+            Commands::UpdateConfig(args) => self.update_cofig(args).await,
 
             _ => Responses::error("commando not implemation".to_string(), json!({})),
         }
@@ -178,12 +182,59 @@ impl Controller {
         Responses::success("Success".to_string(), list)
     }
 
+    async fn toggle_pause_time_block(&self, args: PauseTimeBlockArgs) -> Responses {
+        let mut state = self.state.write().await;
+
+        if state.user.is_none() {
+            return Responses::error("No user logged in".to_string(), json!({}));
+        } else if !state.user.as_ref().unwrap().blocks.contains_key(&args.name) {
+            return Responses::error("Time block not found".to_string(), json!({}));
+        }
+
+        if let Some(tb) = state.active_time_blocks.get_mut(&args.name) {
+            match &tb.state {
+                StateBlock::InProgress => {
+                    tb.state = StateBlock::Paused;
+                }
+
+                StateBlock::Paused => {
+                    tb.state = StateBlock::InProgress;
+                }
+
+                _ => {
+                    return Responses::error(
+                        "Time Block is not in a valid state".to_string(),
+                        json!({}),
+                    );
+                }
+            }
+
+            return Responses::success("Success".to_string(), json!({}));
+        } else {
+            return Responses::error("Time Block is not activated".to_string(), json!({}));
+        }
+    }
+
     async fn get_cofig(&self) -> Responses {
         let state = self.state.read().await;
 
         if let Some(user) = state.user.as_ref() {
             let config = &user.config;
             Responses::success("Success".to_string(), config);
+        }
+
+        Responses::error("No user logged in".to_string(), json!({}))
+    }
+
+    async fn update_cofig(&self, args: UpdateConfigArgs) -> Responses {
+        let mut state = self.state.write().await;
+
+        if let Some(user) = state.user.as_mut() {
+            user.config.default_message = args.default_message;
+            user.config.default_denied_acess = args.default_denied_acess;
+            user.config.default_denied_apps = args.default_denied_apps;
+
+            Responses::success("Success".to_string(), &user.config);
         }
 
         Responses::error("No user logged in".to_string(), json!({}))
