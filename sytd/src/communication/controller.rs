@@ -1,6 +1,6 @@
 use super::{Responses, commands::Commands};
 use crate::{
-    communication::{CreateTimeBlockArgs, UpdateTimeBlockArgs},
+    communication::{CreateTimeBlockArgs, DeleteTimeBlockArgs, UpdateTimeBlockArgs},
     models::TimeBlock,
     state_app::SharedStateApp,
     storage::SharedStorage,
@@ -25,6 +25,7 @@ impl Controller {
         match command {
             Commands::CreateTimeBlock(args) => self.create_time_block(args).await,
             Commands::UpdateTimeBlock(args) => self.update_time_block(args).await,
+            Commands::DeleteTimeBlock(args) => 
 
             _ => Responses::error("commando not implemation".to_string(), json!({})),
         }
@@ -80,7 +81,7 @@ impl Controller {
                 );
             }
 
-            let _ = user.blocks.remove(&args.name).unwrap();
+            let _ = user.blocks.remove(&args.name);
 
             let mut tb_builder = TimeBlock::new();
             tb_builder.name(args.name);
@@ -99,6 +100,25 @@ impl Controller {
                 }
                 Err(msg) => Responses::error(msg, json!({})),
             };
+        }
+
+        Responses::error("No user logged in".to_string(), json!({}))
+    }
+
+    async fn delete_time_block(&self, args: DeleteTimeBlockArgs) -> Responses {
+        let mut state = self.state.write().await;
+        let storage = self.storage.clone();
+
+        if let Some(user) = state.user.as_mut() {
+            if !user.blocks.contains_key(&args.name) {
+                return Responses::error("Time block not found".to_string(), json!({}));
+            }
+
+            let _ = user.blocks.remove(&args.name);
+            let _ = state.active_time_blocks.remove(&args.name);
+
+            let _ = storage.save(user).await;
+            return Responses::success("TimeBlock deleted successfully".to_string(), json!({}));
         }
 
         Responses::error("No user logged in".to_string(), json!({}))
