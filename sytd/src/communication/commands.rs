@@ -52,11 +52,11 @@ pub struct UpdateTimeBlockArgs {
 
     pub message: Option<String>,
 
-    pub denied_web: Option<Vec<String>>,
-    pub allow_web: Option<Vec<String>>,
+    pub denied_web: Vec<String>,
+    pub allow_web: Vec<String>,
 
-    pub denied_apps: Option<Vec<String>>,
-    pub allow_apps: Option<Vec<String>>,
+    pub denied_apps: Vec<String>,
+    pub allow_apps: Vec<String>,
 
     pub days: Vec<Weekday>,
 }

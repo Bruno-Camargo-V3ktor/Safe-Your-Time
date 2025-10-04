@@ -65,6 +65,42 @@ impl Controller {
     }
 
     async fn update_time_block(&self, args: UpdateTimeBlockArgs) -> Responses {
+        let mut state = self.state.write().await;
+        let storage = self.storage.clone();
+
+        if let Some(user) = state.user.as_mut() {
+            if !user.blocks.contains_key(&args.name) {
+                return Responses::error("Time block not found".to_string(), json!({}));
+            }
+
+            if args.new_name.is_some() && user.blocks.contains_key(&args.new_name.unwrap()) {
+                return Responses::error(
+                    "Name already used by another TimeBlock".to_string(),
+                    json!({}),
+                );
+            }
+
+            let _ = user.blocks.remove(&args.name).unwrap();
+
+            let mut tb_builder = TimeBlock::new();
+            tb_builder.name(args.name);
+            tb_builder.message(args.message);
+            tb_builder.duration(args.duration);
+            tb_builder.time(args.start_time, args.end_time);
+            tb_builder.allow(args.allow_web, args.allow_apps);
+            tb_builder.denied(args.denied_web, args.denied_apps);
+            tb_builder.days(args.days);
+
+            return match tb_builder.build() {
+                Ok(tb) => {
+                    user.blocks.insert(tb.name.clone(), tb.clone());
+                    let _ = storage.save(user).await;
+                    Responses::success("TimeBlock updated successfully".to_string(), tb)
+                }
+                Err(msg) => Responses::error(msg, json!({})),
+            };
+        }
+
         Responses::error("No user logged in".to_string(), json!({}))
     }
 }
