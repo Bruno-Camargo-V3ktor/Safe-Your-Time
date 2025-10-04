@@ -1,4 +1,4 @@
-use chrono::{DateTime, Duration, Local, Weekday};
+use chrono::Weekday;
 use serde::{Deserialize, Serialize};
 
 use crate::models::TimeRegister;
@@ -14,7 +14,6 @@ pub enum Commands {
     CreateTimeBlock(CreateTimeBlockArgs),
     UpdateTimeBlock(UpdateTimeBlockArgs),
     DeleteTimeBlock(DeleteTimeBlockArgs),
-    StatusTimeBlock,
     StartTimeBlock(StartTimeBlockArgs),
     StopTimeBlock(StopTimeBlockArgs),
     ShowTimeBlock(ShowTimeBlockArgs),
@@ -45,12 +44,11 @@ pub struct CreateTimeBlockArgs {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UpdateTimeBlockArgs {
     pub name: String,
-
     pub new_name: Option<String>,
 
-    pub duration: Option<Duration>,
-    pub start_time: Option<DateTime<Local>>,
-    pub end_time: Option<DateTime<Local>>,
+    pub duration: Option<TimeRegister>,
+    pub start_time: Option<TimeRegister>,
+    pub end_time: Option<TimeRegister>,
 
     pub message: Option<String>,
 
@@ -60,7 +58,7 @@ pub struct UpdateTimeBlockArgs {
     pub denied_apps: Option<Vec<String>>,
     pub allow_apps: Option<Vec<String>>,
 
-    pub days: Option<String>,
+    pub days: Vec<Weekday>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

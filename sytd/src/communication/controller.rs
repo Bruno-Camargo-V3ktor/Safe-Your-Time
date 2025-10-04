@@ -1,6 +1,8 @@
 use super::{Responses, commands::Commands};
 use crate::{
-    communication::CreateTimeBlockArgs, models::TimeBlock, state_app::SharedStateApp,
+    communication::{CreateTimeBlockArgs, UpdateTimeBlockArgs},
+    models::TimeBlock,
+    state_app::SharedStateApp,
     storage::SharedStorage,
 };
 use serde_json::json;
@@ -22,6 +24,7 @@ impl Controller {
     pub async fn process(&self, command: Commands) -> Responses {
         match command {
             Commands::CreateTimeBlock(args) => self.create_time_block(args).await,
+            Commands::UpdateTimeBlock(args) => self.update_time_block(args).await,
 
             _ => Responses::error("commando not implemation".to_string(), json!({})),
         }
@@ -58,6 +61,10 @@ impl Controller {
             };
         }
 
+        Responses::error("No user logged in".to_string(), json!({}))
+    }
+
+    async fn update_time_block(&self, args: UpdateTimeBlockArgs) -> Responses {
         Responses::error("No user logged in".to_string(), json!({}))
     }
 }
