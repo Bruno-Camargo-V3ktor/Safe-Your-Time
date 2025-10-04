@@ -6,7 +6,7 @@ use crate::{
     },
     models::{StateBlock, TimeBlock},
     state_app::SharedStateApp,
-    storage::SharedStorage,
+    storage::{self, SharedStorage},
 };
 use serde_json::json;
 use std::sync::Arc;
@@ -228,12 +228,14 @@ impl Controller {
 
     async fn update_cofig(&self, args: UpdateConfigArgs) -> Responses {
         let mut state = self.state.write().await;
+        let storage = self.storage.clone();
 
         if let Some(user) = state.user.as_mut() {
             user.config.default_message = args.default_message;
             user.config.default_denied_acess = args.default_denied_acess;
             user.config.default_denied_apps = args.default_denied_apps;
 
+            let _ = storage.save(user).await;
             Responses::success("Success".to_string(), &user.config);
         }
 
