@@ -1,4 +1,4 @@
-use serde::{ Deserialize, Serialize };
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -6,6 +6,7 @@ use serde_json::Value;
 pub enum Responses {
     Success(ResponseContent),
     Error(ResponseContent),
+    Panic(ResponseContent),
 }
 
 #[derive(Debug, Serialize, Deserialize)]

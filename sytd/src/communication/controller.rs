@@ -40,8 +40,7 @@ impl Controller {
 
             Commands::ShowConfig => self.get_cofig().await,
             Commands::UpdateConfig(args) => self.update_cofig(args).await,
-
-            _ => Responses::error("commando not implemation".to_string(), json!({})),
+            //_ => Responses::error("commando not implemation".to_string(), json!({})),
         }
     }
 
