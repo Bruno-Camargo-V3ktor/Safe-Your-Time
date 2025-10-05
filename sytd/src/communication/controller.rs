@@ -2,11 +2,11 @@ use super::{Responses, commands::Commands};
 use crate::{
     communication::{
         CreateTimeBlockArgs, DeleteTimeBlockArgs, PauseTimeBlockArgs, ShowTimeBlockArgs,
-        UpdateConfigArgs, UpdateTimeBlockArgs,
+        StartTimeBlockArgs, StopTimeBlockArgs, UpdateConfigArgs, UpdateTimeBlockArgs,
     },
     models::{StateBlock, TimeBlock},
     state_app::SharedStateApp,
-    storage::{self, SharedStorage},
+    storage::SharedStorage,
 };
 use serde_json::json;
 use std::sync::Arc;
@@ -34,7 +34,9 @@ impl Controller {
             Commands::ListTimeBlocks => self.list_all_time_blocks().await,
             Commands::ShowActiveTimeBlocks => self.list_active_time_blocks().await,
 
+            Commands::StartTimeBlock(args) => self.start_time_block(args).await,
             Commands::PauseTimeBlock(args) => self.toggle_pause_time_block(args).await,
+            Commands::StopTimeBlock(args) => self.stop_time_block(args).await,
 
             Commands::ShowConfig => self.get_cofig().await,
             Commands::UpdateConfig(args) => self.update_cofig(args).await,
@@ -182,6 +184,10 @@ impl Controller {
         Responses::success("Success".to_string(), list)
     }
 
+    async fn start_time_block(&self, args: StartTimeBlockArgs) -> Responses {
+        todo!()
+    }
+
     async fn toggle_pause_time_block(&self, args: PauseTimeBlockArgs) -> Responses {
         let mut state = self.state.write().await;
 
@@ -199,6 +205,39 @@ impl Controller {
 
                 StateBlock::Paused => {
                     tb.state = StateBlock::InProgress;
+                }
+
+                _ => {
+                    return Responses::error(
+                        "Time Block is not in a valid state".to_string(),
+                        json!({}),
+                    );
+                }
+            }
+
+            return Responses::success("Success".to_string(), json!({}));
+        } else {
+            return Responses::error("Time Block is not activated".to_string(), json!({}));
+        }
+    }
+
+    async fn stop_time_block(&self, args: StopTimeBlockArgs) -> Responses {
+        let mut state = self.state.write().await;
+
+        if state.user.is_none() {
+            return Responses::error("No user logged in".to_string(), json!({}));
+        } else if !state.user.as_ref().unwrap().blocks.contains_key(&args.name) {
+            return Responses::error("Time block not found".to_string(), json!({}));
+        }
+
+        if let Some(tb) = state.active_time_blocks.get_mut(&args.name) {
+            match &tb.state {
+                StateBlock::InProgress => {
+                    tb.state = StateBlock::Finished;
+                }
+
+                StateBlock::Paused => {
+                    tb.state = StateBlock::Finished;
                 }
 
                 _ => {
