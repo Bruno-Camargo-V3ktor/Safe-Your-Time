@@ -3,6 +3,7 @@ use actix_web::{ App, HttpServer, web };
 
 use super::routers::{
     create_time_block,
+    update_time_block,
     delete_time_block,
     get_time_bock,
     list_time_bock,
@@ -34,6 +35,7 @@ impl Listener for ListenerHttp {
                     web
                         ::scope("/api")
                         .service(create_time_block)
+                        .service(update_time_block)
                         .service(delete_time_block)
                         .service(get_time_bock)
                         .service(list_time_bock)

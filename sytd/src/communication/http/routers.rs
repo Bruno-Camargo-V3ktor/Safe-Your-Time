@@ -1,4 +1,4 @@
-use actix_web::{ HttpResponse, Responder, delete, get, post, web };
+use actix_web::{ HttpResponse, Responder, delete, get, patch, post, web };
 use serde::Deserialize;
 use serde_json::json;
 use crate::communication::{
@@ -11,6 +11,7 @@ use crate::communication::{
     ShowTimeBlockArgs,
     StartTimeBlockArgs,
     StopTimeBlockArgs,
+    UpdateTimeBlockArgs,
     http::util::converte_response_in_http,
 };
 
@@ -30,6 +31,17 @@ pub async fn create_time_block(
     content: web::Json<CreateTimeBlockArgs>
 ) -> impl Responder {
     let command = Commands::CreateTimeBlock(content.into_inner());
+    let response = controller.process(command).await;
+
+    converte_response_in_http(response, 200, 400, 500)
+}
+
+#[patch("/timeblock")]
+pub async fn update_time_block(
+    controller: web::Data<SharedController>,
+    content: web::Json<UpdateTimeBlockArgs>
+) -> impl Responder {
+    let command = Commands::UpdateTimeBlock(content.into_inner());
     let response = controller.process(command).await;
 
     converte_response_in_http(response, 200, 400, 500)
