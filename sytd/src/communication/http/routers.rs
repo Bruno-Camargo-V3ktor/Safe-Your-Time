@@ -3,6 +3,7 @@ use serde::Deserialize;
 use serde_json::json;
 use crate::communication::{
     Commands,
+    CreateTimeBlockArgs,
     DeleteTimeBlockArgs,
     PauseTimeBlockArgs,
     ResponseContent,
@@ -21,6 +22,17 @@ struct FilterActives {
 #[derive(Deserialize)]
 struct CommandForTimeBlock {
     command: String,
+}
+
+#[post("/timeblock")]
+pub async fn create_time_block(
+    controller: web::Data<SharedController>,
+    content: web::Json<CreateTimeBlockArgs>
+) -> impl Responder {
+    let command = Commands::CreateTimeBlock(content.into_inner());
+    let response = controller.process(command).await;
+
+    converte_response_in_http(response, 200, 400, 500)
 }
 
 #[delete("/timeblock/{name}")]
