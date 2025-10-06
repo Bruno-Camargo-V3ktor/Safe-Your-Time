@@ -11,6 +11,7 @@ use crate::communication::{
     ShowTimeBlockArgs,
     StartTimeBlockArgs,
     StopTimeBlockArgs,
+    UpdateConfigArgs,
     UpdateTimeBlockArgs,
     http::util::converte_response_in_http,
 };
@@ -121,5 +122,16 @@ pub async fn get_config(controller: web::Data<SharedController>) -> impl Respond
     let command = Commands::ShowConfig;
     let response = controller.process(command).await;
 
-    converte_response_in_http(response, 200, 404, 500)
+    converte_response_in_http(response, 200, 400, 500)
+}
+
+#[patch("/config")]
+pub async fn update_config(
+    controller: web::Data<SharedController>,
+    content: web::Json<UpdateConfigArgs>
+) -> impl Responder {
+    let command = Commands::UpdateConfig(content.into_inner());
+    let response = controller.process(command).await;
+
+    converte_response_in_http(response, 200, 400, 500)
 }

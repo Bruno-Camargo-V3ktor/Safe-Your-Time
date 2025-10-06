@@ -9,6 +9,7 @@ use super::routers::{
     list_time_bock,
     command_for_time_block,
     get_config,
+    update_config,
 };
 
 pub struct ListenerHttp {
@@ -42,6 +43,7 @@ impl Listener for ListenerHttp {
                         .service(list_time_bock)
                         .service(command_for_time_block)
                         .service(get_config)
+                        .service(update_config)
                 )
         })
             .bind((addr.into(), 4321))
