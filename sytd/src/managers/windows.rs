@@ -61,7 +61,7 @@ impl Manager for WindowsManager {
         }
     }
 
-    async fn notification(&self, title: String, body: String) -> anyhow::Result<()> {
+    async fn notification(&self, _title: String, _body: String) -> anyhow::Result<()> {
         todo!()
     }
 }

@@ -1,9 +1,9 @@
-#[cfg(target_os = "linux")]
 mod linux;
 mod macos;
 mod windows;
 
 // Tratis
+#[allow(dead_code)]
 pub trait Manager {
     async fn monitoring_apps(&self, apps: Vec<String>);
 

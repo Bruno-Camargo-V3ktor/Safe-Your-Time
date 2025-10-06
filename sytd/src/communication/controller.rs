@@ -191,7 +191,7 @@ impl Controller {
         Responses::success("Success".to_string(), list)
     }
 
-    async fn start_time_block(&self, args: StartTimeBlockArgs) -> Responses {
+    async fn start_time_block(&self, _args: StartTimeBlockArgs) -> Responses {
         todo!()
     }
 
