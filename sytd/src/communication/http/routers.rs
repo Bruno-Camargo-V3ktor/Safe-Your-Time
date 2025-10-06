@@ -115,3 +115,11 @@ pub async fn command_for_time_block(
 
     converte_response_in_http(response, 200, 404, 500)
 }
+
+#[get("/config")]
+pub async fn get_config(controller: web::Data<SharedController>) -> impl Responder {
+    let command = Commands::ShowConfig;
+    let response = controller.process(command).await;
+
+    converte_response_in_http(response, 200, 404, 500)
+}
