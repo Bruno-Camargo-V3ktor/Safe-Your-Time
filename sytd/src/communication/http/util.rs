@@ -1,12 +1,12 @@
 use crate::communication::Responses;
-use actix_web::{HttpResponseBuilder, Responder, http::StatusCode};
+use actix_web::{ HttpResponse, HttpResponseBuilder, http::StatusCode };
 
 pub fn converte_response_in_http(
     response: Responses,
     success_code: u16,
     error_code: u16,
-    panic_code: u16,
-) -> impl Responder {
+    panic_code: u16
+) -> HttpResponse {
     let body;
     let status_code: u16;
 

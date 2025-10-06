@@ -1,7 +1,7 @@
 use super::super::{ Listener, controller::SharedController };
 use actix_web::{ App, HttpServer, web };
 
-use super::routers::{ delete_time_block, get_time_bock, list_time_bock };
+use super::routers::{ delete_time_block, get_time_bock, list_time_bock, command_for_time_block };
 
 pub struct ListenerHttp {
     controller: SharedController,
@@ -30,6 +30,7 @@ impl Listener for ListenerHttp {
                         .service(delete_time_block)
                         .service(get_time_bock)
                         .service(list_time_bock)
+                        .service(command_for_time_block)
                 )
         })
             .bind((addr.into(), 4321))

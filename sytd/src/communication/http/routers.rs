@@ -1,16 +1,26 @@
-use actix_web::{ Responder, delete, web, get };
+use actix_web::{ HttpResponse, Responder, delete, get, post, web };
 use serde::Deserialize;
+use serde_json::json;
 use crate::communication::{
     Commands,
     DeleteTimeBlockArgs,
+    PauseTimeBlockArgs,
+    ResponseContent,
     SharedController,
     ShowTimeBlockArgs,
+    StartTimeBlockArgs,
+    StopTimeBlockArgs,
     http::util::converte_response_in_http,
 };
 
 #[derive(Deserialize)]
 struct FilterActives {
     actives: Option<bool>,
+}
+
+#[derive(Deserialize)]
+struct CommandForTimeBlock {
+    command: String,
 }
 
 #[delete("/timeblock/{name}")]
@@ -52,6 +62,31 @@ pub async fn list_time_bock(
         Commands::ListTimeBlocks
     };
 
+    let response = controller.process(command).await;
+
+    converte_response_in_http(response, 200, 404, 500)
+}
+
+#[post("/timeblock/{name}")]
+pub async fn command_for_time_block(
+    controller: web::Data<SharedController>,
+    name: web::Path<String>,
+    command: web::Query<CommandForTimeBlock>
+) -> impl Responder {
+    let name = name.into_inner();
+
+    let command = match &command.into_inner().command[..] {
+        "start" => { Commands::StartTimeBlock(StartTimeBlockArgs { name }) }
+        "stop" => { Commands::StopTimeBlock(StopTimeBlockArgs { name }) }
+        "pause" => { Commands::PauseTimeBlock(PauseTimeBlockArgs { name }) }
+
+        _ => {
+            return HttpResponse::BadRequest().json(ResponseContent {
+                message: String::from("Command not exist"),
+                payload: json!({}),
+            });
+        }
+    };
     let response = controller.process(command).await;
 
     converte_response_in_http(response, 200, 404, 500)
