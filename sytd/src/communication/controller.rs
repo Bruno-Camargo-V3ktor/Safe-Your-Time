@@ -1,10 +1,16 @@
-use super::{Responses, commands::Commands};
+use super::{ Responses, commands::Commands };
 use crate::{
     communication::{
-        CreateTimeBlockArgs, DeleteTimeBlockArgs, PauseTimeBlockArgs, ShowTimeBlockArgs,
-        StartTimeBlockArgs, StopTimeBlockArgs, UpdateConfigArgs, UpdateTimeBlockArgs,
+        CreateTimeBlockArgs,
+        DeleteTimeBlockArgs,
+        PauseTimeBlockArgs,
+        ShowTimeBlockArgs,
+        StartTimeBlockArgs,
+        StopTimeBlockArgs,
+        UpdateConfigArgs,
+        UpdateTimeBlockArgs,
     },
-    models::{StateBlock, TimeBlock},
+    models::{ StateBlock, TimeBlock },
     state_app::SharedStateApp,
     storage::SharedStorage,
 };
@@ -52,7 +58,7 @@ impl Controller {
             if user.blocks.contains_key(&args.name) {
                 return Responses::error(
                     "There is already a time block with that name".to_string(),
-                    json!({}),
+                    json!({})
                 );
             }
 
@@ -75,7 +81,7 @@ impl Controller {
             };
         }
 
-        Responses::error("No user logged in".to_string(), json!({}))
+        Responses::panic("No user logged in".to_string(), json!({}))
     }
 
     async fn update_time_block(&self, args: UpdateTimeBlockArgs) -> Responses {
@@ -90,7 +96,7 @@ impl Controller {
             if args.new_name.is_some() && user.blocks.contains_key(&args.new_name.unwrap()) {
                 return Responses::error(
                     "Name already used by another TimeBlock".to_string(),
-                    json!({}),
+                    json!({})
                 );
             }
 
@@ -115,7 +121,7 @@ impl Controller {
             };
         }
 
-        Responses::error("No user logged in".to_string(), json!({}))
+        Responses::panic("No user logged in".to_string(), json!({}))
     }
 
     async fn delete_time_block(&self, args: DeleteTimeBlockArgs) -> Responses {
@@ -138,7 +144,7 @@ impl Controller {
             Responses::success("TimeBlock deleted successfully".to_string(), json!({}));
         }
 
-        Responses::error("No user logged in".to_string(), json!({}))
+        Responses::panic("No user logged in".to_string(), json!({}))
     }
 
     async fn get_time_bock(&self, args: ShowTimeBlockArgs) -> Responses {
@@ -151,7 +157,7 @@ impl Controller {
             };
         }
 
-        Responses::error("No user logged in".to_string(), json!({}))
+        Responses::panic("No user logged in".to_string(), json!({}))
     }
 
     async fn list_all_time_blocks(&self) -> Responses {
@@ -161,21 +167,23 @@ impl Controller {
             let mut blocks: std::collections::HashMap<String, TimeBlock> = user.blocks.clone();
             blocks.extend(state.active_time_blocks.clone());
 
-            let list = blocks.iter().map(|(_, tb)| tb).collect::<Vec<_>>();
+            let list = blocks
+                .iter()
+                .map(|(_, tb)| tb)
+                .collect::<Vec<_>>();
             Responses::success("Success".to_string(), list);
         }
 
-        Responses::error("No user logged in".to_string(), json!({}))
+        Responses::panic("No user logged in".to_string(), json!({}))
     }
 
     async fn list_active_time_blocks(&self) -> Responses {
         let state = self.state.read().await;
         if state.user.is_none() {
-            return Responses::error("No user logged in".to_string(), json!({}));
+            return Responses::panic("No user logged in".to_string(), json!({}));
         }
 
-        let list = state
-            .active_time_blocks
+        let list = state.active_time_blocks
             .iter()
             .map(|(_, tb)| tb)
             .filter(|tb| tb.state == StateBlock::InProgress)
@@ -191,7 +199,7 @@ impl Controller {
         let mut state = self.state.write().await;
 
         if state.user.is_none() {
-            return Responses::error("No user logged in".to_string(), json!({}));
+            return Responses::panic("No user logged in".to_string(), json!({}));
         } else if !state.user.as_ref().unwrap().blocks.contains_key(&args.name) {
             return Responses::error("Time block not found".to_string(), json!({}));
         }
@@ -209,7 +217,7 @@ impl Controller {
                 _ => {
                     return Responses::error(
                         "Time Block is not in a valid state".to_string(),
-                        json!({}),
+                        json!({})
                     );
                 }
             }
@@ -224,7 +232,7 @@ impl Controller {
         let mut state = self.state.write().await;
 
         if state.user.is_none() {
-            return Responses::error("No user logged in".to_string(), json!({}));
+            return Responses::panic("No user logged in".to_string(), json!({}));
         } else if !state.user.as_ref().unwrap().blocks.contains_key(&args.name) {
             return Responses::error("Time block not found".to_string(), json!({}));
         }
@@ -242,7 +250,7 @@ impl Controller {
                 _ => {
                     return Responses::error(
                         "Time Block is not in a valid state".to_string(),
-                        json!({}),
+                        json!({})
                     );
                 }
             }
@@ -261,7 +269,7 @@ impl Controller {
             Responses::success("Success".to_string(), config);
         }
 
-        Responses::error("No user logged in".to_string(), json!({}))
+        Responses::panic("No user logged in".to_string(), json!({}))
     }
 
     async fn update_cofig(&self, args: UpdateConfigArgs) -> Responses {
@@ -277,6 +285,6 @@ impl Controller {
             Responses::success("Success".to_string(), &user.config);
         }
 
-        Responses::error("No user logged in".to_string(), json!({}))
+        Responses::panic("No user logged in".to_string(), json!({}))
     }
 }

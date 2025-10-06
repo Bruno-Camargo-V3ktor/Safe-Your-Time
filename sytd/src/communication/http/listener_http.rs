@@ -1,6 +1,5 @@
 use super::super::{ Listener, controller::SharedController };
 use actix_web::{ App, HttpServer, web };
-
 use super::routers::{
     create_time_block,
     update_time_block,

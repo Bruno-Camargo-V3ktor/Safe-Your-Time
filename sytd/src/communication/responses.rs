@@ -34,6 +34,15 @@ impl Responses {
         Self::Error(content)
     }
 
+    pub fn panic<T: Serialize>(message: String, payload: T) -> Self {
+        let content = ResponseContent {
+            message,
+            payload: serde_json::to_value(payload).unwrap(),
+        };
+
+        Self::Panic(content)
+    }
+
     pub fn to_bytes(&self) -> Vec<u8> {
         let str_json = serde_json::to_string(self).unwrap();
         str_json.into_bytes()
