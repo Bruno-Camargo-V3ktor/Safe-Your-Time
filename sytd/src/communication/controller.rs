@@ -149,9 +149,14 @@ impl Controller {
 
     async fn get_time_bock(&self, args: ShowTimeBlockArgs) -> Responses {
         let state = self.state.read().await;
+        let mut tb = state.active_time_blocks.get(&args.name);
 
         if let Some(user) = state.user.as_ref() {
-            return match user.blocks.get(&args.name) {
+            if tb.is_none() {
+                tb = user.blocks.get(&args.name);
+            }
+
+            return match tb {
                 Some(tb) => Responses::success("Success".to_string(), tb),
                 None => Responses::error("Time block not found".to_string(), json!({})),
             };
