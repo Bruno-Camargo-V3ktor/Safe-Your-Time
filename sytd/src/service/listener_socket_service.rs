@@ -1,5 +1,5 @@
-use super::Service;
-use crate::communication::{Listener, ListenerSockter, SharedController};
+use super::{ Service, BuildService, ServicePool };
+use crate::communication::{ Listener, ListenerSockter, SharedController };
 use tokio::task::JoinHandle;
 
 pub struct ListenerSocketService {
@@ -7,7 +7,24 @@ pub struct ListenerSocketService {
     handle_server: Option<JoinHandle<()>>,
 }
 
+struct BuildListenerSocketService;
+
+#[async_trait::async_trait]
+impl BuildService for BuildListenerSocketService {
+    async fn build(&self, states: &ServicePool) -> Box<dyn Service + Send + Sync> {
+        let service = ListenerSocketService::new(
+            states.get_state::<SharedController>().await.unwrap()
+        );
+
+        Box::new(service)
+    }
+}
+
 impl ListenerSocketService {
+    pub fn build() -> BuildListenerSocketService {
+        BuildListenerSocketService {}
+    }
+
     pub fn new(controller: SharedController) -> Self {
         Self {
             controller,
@@ -17,10 +34,12 @@ impl ListenerSocketService {
 
     pub fn init_server(&mut self) {
         let controller = self.controller.clone();
-        self.handle_server = Some(tokio::spawn(async move {
-            let listener_serve = ListenerSockter::new(controller);
-            let _ = listener_serve.server("/tmp/sytd.sock").await;
-        }));
+        self.handle_server = Some(
+            tokio::spawn(async move {
+                let listener_serve = ListenerSockter::new(controller);
+                let _ = listener_serve.server("/tmp/sytd.sock").await;
+            })
+        );
     }
 }
 
