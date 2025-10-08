@@ -1,13 +1,29 @@
 use std::collections::HashSet;
-
-use super::Service;
+use super::{ Service, BuildService, ServicePool };
 use crate::{ managers::{ Manager, get_manager }, models::StateBlock, state_app::SharedStateApp };
 
 pub struct MonitoringAppsService {
     state: SharedStateApp,
 }
 
+struct BuildMonitoringAppsService;
+
+#[async_trait::async_trait]
+impl BuildService for BuildMonitoringAppsService {
+    async fn build(&self, states: &ServicePool) -> Box<dyn Service + Send + Sync> {
+        let service = MonitoringAppsService::new(
+            states.get_state::<SharedStateApp>().await.unwrap()
+        );
+
+        Box::new(service)
+    }
+}
+
 impl MonitoringAppsService {
+    pub fn build() -> BuildMonitoringAppsService {
+        BuildMonitoringAppsService {}
+    }
+
     pub fn new(state: SharedStateApp) -> Self {
         Self { state }
     }
