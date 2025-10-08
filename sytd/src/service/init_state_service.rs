@@ -1,6 +1,5 @@
 use std::collections::HashMap;
-
-use super::Service;
+use super::{ Service, BuildService, ServicePool };
 use crate::{
     managers::{ Manager, get_manager },
     models::User,
@@ -13,7 +12,25 @@ pub struct InitStateService {
     storage: SharedStorage,
 }
 
+pub struct BuildInitStateService;
+
+#[async_trait::async_trait]
+impl BuildService for BuildInitStateService {
+    async fn build(&self, states: &ServicePool) -> Box<dyn Service + Send + Sync> {
+        let service = InitStateService::new(
+            states.get_state::<SharedStateApp>().await.unwrap(),
+            states.get_state::<SharedStorage>().await.unwrap()
+        );
+
+        Box::new(service)
+    }
+}
+
 impl InitStateService {
+    pub fn build() -> BuildInitStateService {
+        BuildInitStateService {}
+    }
+
     pub fn new(state: SharedStateApp, storage: SharedStorage) -> Self {
         Self { state, storage }
     }

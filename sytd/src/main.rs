@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use crate::{
     communication::Controller,
     service::{
@@ -30,17 +28,11 @@ async fn main() {
     let controller = Controller::new(storage.clone(), state_app.clone());
 
     let mut services = ServicePool::new();
-    services.add_state(state_app.clone()).await;
-    services.add_state(storage.clone()).await;
-    services.add_state(controller.clone()).await;
+    services.add_state(state_app).await;
+    services.add_state(storage).await;
+    services.add_state(controller).await;
 
-    let new_storage = services.get_state::<Arc<dyn Storage + Send + Sync>>().await;
-    println!(
-        "{:?}",
-        new_storage.and_then(|_| Some("Deu certo".to_string()))
-    );
-
-    services.add_service(InitStateService::new(state_app.clone(), storage.clone()), 5000);
+    services.add_service(InitStateService::build(), 5000);
     services.add_service(TimerService::new(state_app.clone()), 2500);
     services.add_service(MonitoringAppsService::new(state_app.clone()), 5000);
     services.add_service(ListenerSocketService::new(controller.clone()), 10000);

@@ -20,6 +20,11 @@ pub trait Service {
     async fn exec(&mut self);
 }
 
+#[async_trait::async_trait]
+pub trait BuildService {
+    async fn build(&self, service: &ServicePool) -> Box<dyn Service + Send + Sync>;
+}
+
 pub struct ServicePool {
     map_state: Arc<RwLock<HashMap<TypeId, Box<dyn Any + Sync + Send>>>>,
     services: Vec<(Box<dyn Service + Send + Sync>, Duration)>,
@@ -30,8 +35,13 @@ impl ServicePool {
         Self { services: vec![], map_state: Arc::new(RwLock::new(HashMap::new())) }
     }
 
-    pub fn add_service<S: Service + Send + Sync + 'static>(&mut self, service: S, time: u64) {
-        self.services.push((Box::new(service), Duration::from_millis(time)));
+    pub async fn add_service<S: BuildService + Send + Sync + 'static>(
+        &mut self,
+        build_service: S,
+        time: u64
+    ) {
+        let service = build_service.build(&self).await;
+        self.services.push((service, Duration::from_millis(time)));
     }
 
     pub async fn add_state<T>(&self, value: T) where T: 'static + Send + Sync + Clone {
