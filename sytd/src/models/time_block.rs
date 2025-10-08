@@ -1,6 +1,6 @@
-use super::{StateBlock, TimeRegister};
+use super::{ StateBlock, TimeRegister };
 use chrono::Weekday;
-use serde::{Deserialize, Serialize};
+use serde::{ Deserialize, Serialize };
 use std::collections::HashSet;
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -104,20 +104,18 @@ impl TimeBlockBuilder {
 
     pub fn build(self) -> Result<TimeBlock, String> {
         if self.set_duration && (self.set_start_time || self.set_end_time) {
-            return Err(String::from(
-                "You cannot set a duration along with a start time or an end time in a time block.",
-            ));
-        } else if !(!self.set_duration && (self.set_start_time && self.set_end_time)) {
-            return Err(String::from(
-                "You need to define a start time and an end time.",
-            ));
+            return Err(
+                String::from(
+                    "You cannot set a duration along with a start time or an end time in a time block."
+                )
+            );
+        } else if !self.set_duration && self.set_start_time && self.set_end_time {
+            return Err(String::from("You need to define a start time and an end time."));
         }
 
         if self.set_start_time && self.set_end_time {
-            if self.time_block.start_time < self.time_block.end_time {
-                return Err(String::from(
-                    "The end time must be greater than the start time.",
-                ));
+            if self.time_block.start_time > self.time_block.end_time {
+                return Err(String::from("The end time must be greater than the start time."));
             }
         }
 
