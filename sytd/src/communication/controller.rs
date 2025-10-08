@@ -1,20 +1,14 @@
-use super::{ Responses, commands::Commands };
+use super::{Responses, commands::Commands};
 use crate::{
     communication::{
-        CreateTimeBlockArgs,
-        DeleteTimeBlockArgs,
-        PauseTimeBlockArgs,
-        ShowTimeBlockArgs,
-        StartTimeBlockArgs,
-        StopTimeBlockArgs,
-        UpdateConfigArgs,
-        UpdateTimeBlockArgs,
+        CreateTimeBlockArgs, DeleteTimeBlockArgs, PauseTimeBlockArgs, ShowTimeBlockArgs,
+        StartTimeBlockArgs, StopTimeBlockArgs, UpdateConfigArgs, UpdateTimeBlockArgs,
     },
-    models::{ StateBlock, TimeBlock, TimeRegister },
+    models::{StateBlock, TimeBlock, TimeRegister},
     state_app::SharedStateApp,
     storage::SharedStorage,
 };
-use chrono::{ Duration, Local, Timelike };
+use chrono::{Duration, Local, Timelike};
 use serde_json::json;
 use std::sync::Arc;
 
@@ -59,7 +53,7 @@ impl Controller {
             if user.blocks.contains_key(&args.name) {
                 return Responses::error(
                     "There is already a time block with that name".to_string(),
-                    json!({})
+                    json!({}),
                 );
             }
 
@@ -97,10 +91,11 @@ impl Controller {
                 return Responses::error("Time block not found".to_string(), json!({}));
             }
 
-            if args.new_name.is_some() && user.blocks.contains_key(&args.new_name.clone().unwrap()) {
+            if args.new_name.is_some() && user.blocks.contains_key(&args.new_name.clone().unwrap())
+            {
                 return Responses::error(
                     "Name already used by another TimeBlock".to_string(),
-                    json!({})
+                    json!({}),
                 );
             }
 
@@ -134,7 +129,7 @@ impl Controller {
             let _ = state.active_time_blocks.remove(&args.name);
             return Responses::success(
                 "TimeBlock updated successfully".to_string(),
-                updated_tb.unwrap()
+                updated_tb.unwrap(),
             );
         }
 
@@ -189,10 +184,7 @@ impl Controller {
             let mut blocks: std::collections::HashMap<String, TimeBlock> = user.blocks.clone();
             blocks.extend(state.active_time_blocks.clone());
 
-            let list = blocks
-                .iter()
-                .map(|(_, tb)| tb)
-                .collect::<Vec<_>>();
+            let list = blocks.iter().map(|(_, tb)| tb).collect::<Vec<_>>();
             return Responses::success("Success".to_string(), list);
         }
 
@@ -205,7 +197,8 @@ impl Controller {
             return Responses::panic("No user logged in".to_string(), json!({}));
         }
 
-        let list = state.active_time_blocks
+        let list = state
+            .active_time_blocks
             .iter()
             .map(|(_, tb)| tb)
             .filter(|tb| tb.state == StateBlock::InProgress)
@@ -225,18 +218,16 @@ impl Controller {
             }
         }
         match state.user.as_ref() {
-            Some(user) => {
-                match user.blocks.get(&args.name) {
-                    Some(tb) => {
-                        timeblock = Some(tb.clone());
-                    }
-                    None => {
-                        if timeblock.is_none() {
-                            return Responses::error("Time block not found".to_string(), json!({}));
-                        }
+            Some(user) => match user.blocks.get(&args.name) {
+                Some(tb) => {
+                    timeblock = Some(tb.clone());
+                }
+                None => {
+                    if timeblock.is_none() {
+                        return Responses::error("Time block not found".to_string(), json!({}));
                     }
                 }
-            }
+            },
             None => {
                 return Responses::panic("No user logged in".to_string(), json!({}));
             }
@@ -246,29 +237,12 @@ impl Controller {
 
         let now = Local::now();
 
-        if timeblock.start_time != timeblock.end_time {
-            if timeblock.end_time.get_local() < now {
-                let seconds = (timeblock.end_time.get_local() - timeblock.start_time.get_local())
-                    .num_seconds()
-                    .abs();
-                let hours = seconds / 3600;
-                let minutes = (seconds % 3600) / 60;
+        let duration = Duration::hours(timeblock.duration.get_local().hour() as i64)
+            + Duration::minutes(timeblock.duration.get_local().minute() as i64);
 
-                let duration = Duration::hours(hours) + Duration::minutes(minutes);
-
-                timeblock.start_time = TimeRegister::from_local(now.clone());
-                timeblock.end_time = TimeRegister::from_local(now + duration);
-            } else {
-                timeblock.start_time = TimeRegister::from_local(now.clone());
-            }
-        } else {
-            let duration =
-                Duration::hours(timeblock.duration.get_local().hour() as i64) +
-                Duration::minutes(timeblock.duration.get_local().minute() as i64);
-
-            timeblock.start_time = TimeRegister::from_local(now.clone());
-            timeblock.end_time = TimeRegister::from_local(now + duration);
-        }
+        timeblock.start_time = TimeRegister::from_local(now.clone());
+        timeblock.end_time = TimeRegister::from_local(now + duration);
+        timeblock.state = StateBlock::InProgress;
 
         state.active_time_blocks.insert(args.name, timeblock);
         return Responses::success("Success".to_string(), json!({}));
@@ -296,7 +270,7 @@ impl Controller {
                 _ => {
                     return Responses::error(
                         "Time Block is not in a valid state".to_string(),
-                        json!({})
+                        json!({}),
                     );
                 }
             }
@@ -329,7 +303,7 @@ impl Controller {
                 _ => {
                     return Responses::error(
                         "Time Block is not in a valid state".to_string(),
-                        json!({})
+                        json!({}),
                     );
                 }
             }
