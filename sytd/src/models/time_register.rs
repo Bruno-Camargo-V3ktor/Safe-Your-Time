@@ -31,7 +31,7 @@ impl Serialize for TimeRegister {
     where
         S: serde::Serializer,
     {
-        let time_string = format!("{}:{}", self.local.hour(), self.local.minute());
+        let time_string = format!("{:02}:{:02}", self.local.hour(), self.local.minute());
         serializer.serialize_str(&time_string)
     }
 }
