@@ -1,6 +1,7 @@
 use crate::{
     communication::Controller,
     service::{
+        BuildService,
         InitStateService,
         ListenerHttpService,
         ListenerSocketService,
@@ -33,7 +34,7 @@ async fn main() {
     services.add_state(controller).await;
 
     services.add_service(InitStateService::build(), 5000);
-    services.add_service(TimerService::new(state_app.clone()), 2500);
+    services.add_service(TimerService::build(), 2500);
     services.add_service(MonitoringAppsService::new(state_app.clone()), 5000);
     services.add_service(ListenerSocketService::new(controller.clone()), 10000);
     services.add_service(ListenerHttpService::new(controller.clone()), 10000);

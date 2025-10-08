@@ -1,15 +1,27 @@
-use super::Service;
-use crate::{
-    models::{StateBlock, TimeRegister},
-    state_app::SharedStateApp,
-};
-use chrono::{Datelike, Local, Timelike};
+use super::{ Service, BuildService, ServicePool };
+use crate::{ models::{ StateBlock, TimeRegister }, state_app::SharedStateApp };
+use chrono::{ Datelike, Local, Timelike };
 
 pub struct TimerService {
     state: SharedStateApp,
 }
 
+struct BuildTimerService;
+
+#[async_trait::async_trait]
+impl BuildService for BuildTimerService {
+    async fn build(&self, states: &ServicePool) -> Box<dyn Service + Send + Sync> {
+        let service = TimerService::new(states.get_state::<SharedStateApp>().await.unwrap());
+
+        Box::new(service)
+    }
+}
+
 impl TimerService {
+    pub fn build() -> BuildTimerService {
+        BuildTimerService {}
+    }
+
     pub fn new(state: SharedStateApp) -> Self {
         Self { state }
     }
@@ -41,8 +53,7 @@ impl Service for TimerService {
         });
 
         let user = state.user.as_ref().unwrap();
-        let time_blocks_for_day = user
-            .blocks
+        let time_blocks_for_day = user.blocks
             .iter()
             .filter(|(_, tb)| tb.days.contains(&weekday))
             .map(|(_, tb)| tb.clone())
