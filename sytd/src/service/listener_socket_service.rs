@@ -7,7 +7,7 @@ pub struct ListenerSocketService {
     handle_server: Option<JoinHandle<()>>,
 }
 
-struct BuildListenerSocketService;
+pub struct BuildListenerSocketService;
 
 #[async_trait::async_trait]
 impl BuildService for BuildListenerSocketService {

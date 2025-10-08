@@ -12,7 +12,7 @@ pub struct InitStateService {
     storage: SharedStorage,
 }
 
-struct BuildInitStateService;
+pub struct BuildInitStateService;
 
 #[async_trait::async_trait]
 impl BuildService for BuildInitStateService {

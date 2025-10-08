@@ -6,7 +6,7 @@ pub struct MonitoringAppsService {
     state: SharedStateApp,
 }
 
-struct BuildMonitoringAppsService;
+pub struct BuildMonitoringAppsService;
 
 #[async_trait::async_trait]
 impl BuildService for BuildMonitoringAppsService {

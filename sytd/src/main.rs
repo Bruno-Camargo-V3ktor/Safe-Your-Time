@@ -33,11 +33,11 @@ async fn main() {
     services.add_state(storage).await;
     services.add_state(controller).await;
 
-    services.add_service(InitStateService::build(), 5000);
-    services.add_service(TimerService::build(), 2500);
-    services.add_service(MonitoringAppsService::build(), 5000);
-    services.add_service(ListenerSocketService::build(), 10000);
-    services.add_service(ListenerHttpService::new(controller.clone()), 10000);
+    services.add_service(InitStateService::build(), 5000).await;
+    services.add_service(TimerService::build(), 2500).await;
+    services.add_service(MonitoringAppsService::build(), 5000).await;
+    services.add_service(ListenerSocketService::build(), 10000).await;
+    services.add_service(ListenerHttpService::build(), 10000).await;
 
     services.init().await;
 

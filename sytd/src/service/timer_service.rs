@@ -6,7 +6,7 @@ pub struct TimerService {
     state: SharedStateApp,
 }
 
-struct BuildTimerService;
+pub struct BuildTimerService;
 
 #[async_trait::async_trait]
 impl BuildService for BuildTimerService {
