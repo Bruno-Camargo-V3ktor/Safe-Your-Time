@@ -266,7 +266,7 @@ impl Controller {
 
         if let Some(user) = state.user.as_ref() {
             let config = &user.config;
-            Responses::success("Success".to_string(), config);
+            return Responses::success("Success".to_string(), config);
         }
 
         Responses::panic("No user logged in".to_string(), json!({}))

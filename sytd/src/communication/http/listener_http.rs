@@ -1,5 +1,7 @@
+use crate::utils::get_dir;
+use actix_files as fs;
 use super::super::{ Listener, controller::SharedController };
-use actix_web::{ App, HttpServer, web };
+use actix_web::{ App, HttpServer, Responder, get, web };
 use super::routers::{
     create_time_block,
     update_time_block,
@@ -10,6 +12,7 @@ use super::routers::{
     get_config,
     update_config,
 };
+use std::path::PathBuf;
 
 pub struct ListenerHttp {
     controller: SharedController,
@@ -28,6 +31,10 @@ impl Listener for ListenerHttp {
     }
 
     async fn server(&self, addr: impl Into<String> + std::marker::Send) -> anyhow::Result<()> {
+        let current_dir = get_dir();
+        let mut directory = PathBuf::from(&current_dir);
+        directory.push("pages");
+
         let controller = self.controller.clone();
         let _ = HttpServer::new(move || {
             App::new()
@@ -44,6 +51,8 @@ impl Listener for ListenerHttp {
                         .service(get_config)
                         .service(update_config)
                 )
+                .service(index)
+                .service(fs::Files::new("/", directory.clone()))
         })
             .bind((addr.into(), 4321))
             .unwrap()
@@ -51,4 +60,14 @@ impl Listener for ListenerHttp {
 
         Ok(())
     }
+}
+
+#[get("/")]
+async fn index() -> impl Responder {
+    let current_dir = get_dir();
+    let mut directory = PathBuf::from(&current_dir);
+    directory.push("pages");
+    directory.push("index.html");
+
+    fs::NamedFile::open(directory).unwrap()
 }
