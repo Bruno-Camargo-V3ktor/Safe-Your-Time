@@ -141,7 +141,7 @@ impl Controller {
 
         if success_deleted {
             let _ = state.active_time_blocks.remove(&args.name);
-            Responses::success("TimeBlock deleted successfully".to_string(), json!({}));
+            return Responses::success("TimeBlock deleted successfully".to_string(), json!({}));
         }
 
         Responses::panic("No user logged in".to_string(), json!({}))
@@ -171,7 +171,7 @@ impl Controller {
                 .iter()
                 .map(|(_, tb)| tb)
                 .collect::<Vec<_>>();
-            Responses::success("Success".to_string(), list);
+            return Responses::success("Success".to_string(), list);
         }
 
         Responses::panic("No user logged in".to_string(), json!({}))
@@ -282,7 +282,7 @@ impl Controller {
             user.config.default_denied_apps = args.default_denied_apps;
 
             let _ = storage.save(user).await;
-            Responses::success("Success".to_string(), &user.config);
+            return Responses::success("Success".to_string(), &user.config);
         }
 
         Responses::panic("No user logged in".to_string(), json!({}))
