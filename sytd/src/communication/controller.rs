@@ -10,10 +10,12 @@ use crate::{
         UpdateConfigArgs,
         UpdateTimeBlockArgs,
     },
-    models::{ StateBlock, TimeBlock },
+    models::{ StateBlock, TimeBlock, TimeRegister },
     state_app::SharedStateApp,
     storage::SharedStorage,
 };
+use actix_web::cookie::time;
+use chrono::{ Duration, Local, Timelike };
 use serde_json::json;
 use std::sync::Arc;
 
@@ -212,8 +214,65 @@ impl Controller {
         Responses::success("Success".to_string(), list)
     }
 
-    async fn start_time_block(&self, _args: StartTimeBlockArgs) -> Responses {
-        todo!()
+    async fn start_time_block(&self, args: StartTimeBlockArgs) -> Responses {
+        let mut state = self.state.write().await;
+        let mut timeblock = None;
+
+        if let Some(tb) = state.active_time_blocks.get(&args.name) {
+            if tb.state == StateBlock::InProgress || tb.state == StateBlock::Paused {
+                return Responses::error("Time block is already active".to_string(), json!({}));
+            } else if tb.state == StateBlock::Idle {
+                timeblock = Some(tb.clone());
+            }
+        }
+        match state.user.as_ref() {
+            Some(user) => {
+                match user.blocks.get(&args.name) {
+                    Some(tb) => {
+                        timeblock = Some(tb.clone());
+                    }
+                    None => {
+                        if timeblock.is_none() {
+                            return Responses::error("Time block not found".to_string(), json!({}));
+                        }
+                    }
+                }
+            }
+            None => {
+                return Responses::panic("No user logged in".to_string(), json!({}));
+            }
+        }
+
+        let mut timeblock = timeblock.unwrap();
+
+        let now = Local::now();
+
+        if timeblock.start_time != timeblock.end_time {
+            if timeblock.end_time.get_local() < now {
+                let seconds = (timeblock.end_time.get_local() - timeblock.start_time.get_local())
+                    .num_seconds()
+                    .abs();
+                let hours = seconds / 3600;
+                let minutes = (seconds % 3600) / 60;
+
+                let duration = Duration::hours(hours) + Duration::minutes(minutes);
+
+                timeblock.start_time = TimeRegister::from_local(now.clone());
+                timeblock.end_time = TimeRegister::from_local(now + duration);
+            } else {
+                timeblock.start_time = TimeRegister::from_local(now.clone());
+            }
+        } else {
+            let duration =
+                Duration::hours(timeblock.duration.get_local().hour() as i64) +
+                Duration::minutes(timeblock.duration.get_local().minute() as i64);
+
+            timeblock.start_time = TimeRegister::from_local(now.clone());
+            timeblock.end_time = TimeRegister::from_local(now + duration);
+        }
+
+        state.active_time_blocks.insert(args.name, timeblock);
+        return Responses::success("Success".to_string(), json!({}));
     }
 
     async fn toggle_pause_time_block(&self, args: PauseTimeBlockArgs) -> Responses {
