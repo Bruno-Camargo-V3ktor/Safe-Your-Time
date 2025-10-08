@@ -1,3 +1,4 @@
+use chrono::{DateTime, Local, TimeZone, Timelike};
 use serde::{
     Deserialize, Serialize,
     de::{self, Visitor},
@@ -5,17 +6,23 @@ use serde::{
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct TimeRegister {
-    hours: u8,
-    minutes: u8,
+    local: DateTime<Local>,
 }
 
 impl TimeRegister {
-    pub fn new(hours: u8, minutes: u8) -> Result<Self, String> {
-        if hours > 23 || minutes > 59 {
-            Err(String::from("invalid time"))
-        } else {
-            Ok(Self { hours, minutes })
-        }
+    pub fn new(hours: u32, minutes: u32) -> Result<Self, String> {
+        let date = Local::now().date_naive();
+        let date_with_hours = date
+            .and_hms_micro_opt(hours, minutes, 0, 0)
+            .ok_or(String::from("invalid time"))?;
+
+        Ok(Self {
+            local: Local.from_local_datetime(&date_with_hours).unwrap(),
+        })
+    }
+
+    pub fn from_local(date: DateTime<Local>) -> Self {
+        Self { local: date }
     }
 }
 
@@ -24,7 +31,7 @@ impl Serialize for TimeRegister {
     where
         S: serde::Serializer,
     {
-        let time_string = format!("{}:{}", self.hours, self.minutes);
+        let time_string = format!("{}:{}", self.local.hour(), self.local.minute());
         serializer.serialize_str(&time_string)
     }
 }
@@ -44,18 +51,21 @@ impl<'de> Visitor<'de> for TimeRegisterVisitor {
             .split_once(':')
             .ok_or_else(|| de::Error::custom(format!("Invalid format, expect format HH:mm")))?;
 
-        let hours: u8 = hours_str
+        let hours: u32 = hours_str
             .parse()
             .map_err(|_| de::Error::custom(format!("hours not a valid number")))?;
-        let minutes: u8 = minutes_str
+        let minutes: u32 = minutes_str
             .parse()
             .map_err(|_| de::Error::custom(format!("minutes not a valid number")))?;
 
-        if hours > 23 || minutes > 59 {
-            return Err(de::Error::custom(format!("invalid time")));
-        }
+        let date = Local::now().date_naive();
+        let date_with_hours = date
+            .and_hms_micro_opt(hours, minutes, 0, 0)
+            .ok_or(de::Error::custom(format!("invalid time")))?;
 
-        Ok(TimeRegister { hours, minutes })
+        Ok(TimeRegister {
+            local: Local.from_local_datetime(&date_with_hours).unwrap(),
+        })
     }
 }
 

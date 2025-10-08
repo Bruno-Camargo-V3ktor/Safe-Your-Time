@@ -20,8 +20,7 @@ impl Service for TimerService {
     async fn exec(&mut self) {
         let now_time = Local::now();
         let weekday = now_time.weekday();
-        let actual_time =
-            TimeRegister::new(now_time.hour() as u8, now_time.minute() as u8).unwrap();
+        let actual_time = TimeRegister::new(now_time.hour(), now_time.minute()).unwrap();
 
         let mut state = self.state.write().await;
         if state.user.is_none() {
