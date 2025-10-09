@@ -1,5 +1,10 @@
-use anyhow::{ Ok, anyhow };
+use std::path::PathBuf;
+
+use anyhow::{Ok, anyhow};
+use notify_rust::{Notification, Urgency};
 use tokio::process::Command;
+
+use crate::utils::get_dir;
 
 use super::Manager;
 
@@ -7,7 +12,11 @@ pub struct LinuxManager {}
 
 impl Manager for LinuxManager {
     async fn monitoring_apps(&self, apps: Vec<String>) {
-        let output = Command::new("top").args(["-b", "-n", "1"]).output().await.unwrap();
+        let output = Command::new("top")
+            .args(["-b", "-n", "1"])
+            .output()
+            .await
+            .unwrap();
 
         if output.status.success() {
             let stdout = String::from_utf8_lossy(&output.stdout);
@@ -28,7 +37,10 @@ impl Manager for LinuxManager {
     }
 
     async fn kill_process(&self, id_process: String) -> anyhow::Result<()> {
-        Command::new("kill").args(["-9", &id_process]).status().await?;
+        Command::new("kill")
+            .args(["-9", &id_process])
+            .status()
+            .await?;
 
         Ok(())
     }
@@ -36,7 +48,8 @@ impl Manager for LinuxManager {
     async fn get_username(&self) -> anyhow::Result<String> {
         let output = Command::new("loginctl")
             .args(["list-users", "-P", "state=active", "--no-legend"])
-            .output().await?;
+            .output()
+            .await?;
 
         if output.status.success() {
             let stdout = String::from_utf8_lossy(&output.stdout);
@@ -52,7 +65,23 @@ impl Manager for LinuxManager {
         Err(anyhow!("{:?}", String::from_utf8(output.stderr)))
     }
 
-    async fn notification(&self, _title: String, _body: String) -> anyhow::Result<()> {
-        todo!()
+    async fn notification(&self, title: String, body: String) -> anyhow::Result<()> {
+        let current_dir = get_dir();
+        let icon_path = PathBuf::from(current_dir)
+            .join("imgs/warning.png")
+            .to_string_lossy()
+            .to_string();
+
+        let _ = tokio::task::spawn_blocking(move || {
+            Notification::new()
+                .summary(&title)
+                .body(&body)
+                .icon(&icon_path)
+                .urgency(Urgency::Critical)
+                .show()
+        })
+        .await??;
+
+        Ok(())
     }
 }
