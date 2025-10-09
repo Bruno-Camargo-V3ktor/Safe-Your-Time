@@ -1,6 +1,10 @@
+use std::sync::Arc;
+
 mod linux;
 mod macos;
 mod windows;
+
+pub type SharedManager = Arc<dyn Manager + Send + Sync>;
 
 // Tratis
 #[async_trait::async_trait]
@@ -15,19 +19,25 @@ pub trait Manager {
 }
 
 #[cfg(target_os = "windows")]
-pub fn get_manager() -> windows::WindowsManager {
+pub fn get_manager() -> SharedManager {
+    use std::sync::Arc;
     use windows::WindowsManager;
-    WindowsManager {}
+
+    Arc::new(WindowsManager {})
 }
 
 #[cfg(target_os = "linux")]
-pub fn get_manager() -> linux::LinuxManager {
+pub fn get_manager() -> SharedManager {
     use linux::LinuxManager;
-    LinuxManager {}
+    use std::sync::Arc;
+
+    Arc::new(LinuxManager {})
 }
 
 #[cfg(target_os = "macos")]
-pub fn get_manager() -> macos::MacOsManager {
+pub fn get_manager() -> SharedManager {
     use macos::MacOsManager;
-    MacOsManager {}
+    use std::sync::Arc;
+
+    Arc::new(MacOsManager {})
 }

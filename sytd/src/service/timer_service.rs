@@ -1,5 +1,6 @@
 use super::{BuildService, Service, ServicePool};
 use crate::{
+    managers::SharedManager,
     models::{StateBlock, TimeRegister},
     state_app::SharedStateApp,
 };
@@ -7,6 +8,7 @@ use chrono::{Datelike, Local, Timelike};
 
 pub struct TimerService {
     state: SharedStateApp,
+    manager: SharedManager,
 }
 
 pub struct BuildTimerService;
@@ -14,7 +16,10 @@ pub struct BuildTimerService;
 #[async_trait::async_trait]
 impl BuildService for BuildTimerService {
     async fn build(&self, states: &ServicePool) -> Box<dyn Service + Send + Sync> {
-        let service = TimerService::new(states.get_state::<SharedStateApp>().await.unwrap());
+        let service = TimerService::new(
+            states.get_state::<SharedStateApp>().await.unwrap(),
+            states.get_state::<SharedManager>().await.unwrap(),
+        );
 
         Box::new(service)
     }
@@ -25,8 +30,8 @@ impl TimerService {
         BuildTimerService {}
     }
 
-    pub fn new(state: SharedStateApp) -> Self {
-        Self { state }
+    pub fn new(state: SharedStateApp, manager: SharedManager) -> Self {
+        Self { state, manager }
     }
 }
 

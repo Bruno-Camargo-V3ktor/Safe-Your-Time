@@ -1,16 +1,13 @@
 use crate::{
     communication::Controller,
+    managers::get_manager,
     service::{
-        InitStateService,
-        ListenerHttpService,
-        ListenerSocketService,
-        MonitoringAppsService,
-        ServicePool,
-        TimerService,
+        InitStateService, ListenerHttpService, ListenerSocketService, MonitoringAppsService,
+        ServicePool, TimerService,
     },
     state_app::StateApp,
     storage::JsonStorage,
-    utils::{ get_dir, shutdown_signal },
+    utils::{get_dir, shutdown_signal},
 };
 
 mod communication;
@@ -26,17 +23,25 @@ async fn main() {
     let state_app = StateApp::new();
     let storage = JsonStorage::new(&get_dir()).await;
     let controller = Controller::new(storage.clone(), state_app.clone());
+    let manager = get_manager();
 
     let mut services = ServicePool::new();
     services.add_state(state_app).await;
     services.add_state(storage).await;
     services.add_state(controller).await;
+    services.add_state(manager).await;
 
     services.add_service(InitStateService::build(), 5000).await;
     services.add_service(TimerService::build(), 2500).await;
-    services.add_service(MonitoringAppsService::build(), 5000).await;
-    services.add_service(ListenerSocketService::build(), 10000).await;
-    services.add_service(ListenerHttpService::build(), 10000).await;
+    services
+        .add_service(MonitoringAppsService::build(), 5000)
+        .await;
+    services
+        .add_service(ListenerSocketService::build(), 10000)
+        .await;
+    services
+        .add_service(ListenerHttpService::build(), 10000)
+        .await;
 
     services.init().await;
 
