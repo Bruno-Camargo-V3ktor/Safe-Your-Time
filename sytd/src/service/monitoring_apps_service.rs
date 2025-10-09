@@ -1,9 +1,10 @@
+use super::{BuildService, Service, ServicePool};
+use crate::{managers::SharedManager, models::StateBlock, state_app::SharedStateApp};
 use std::collections::HashSet;
-use super::{ Service, BuildService, ServicePool };
-use crate::{ managers::{ Manager, get_manager }, models::StateBlock, state_app::SharedStateApp };
 
 pub struct MonitoringAppsService {
     state: SharedStateApp,
+    manager: SharedManager,
 }
 
 pub struct BuildMonitoringAppsService;
@@ -12,7 +13,8 @@ pub struct BuildMonitoringAppsService;
 impl BuildService for BuildMonitoringAppsService {
     async fn build(&self, states: &ServicePool) -> Box<dyn Service + Send + Sync> {
         let service = MonitoringAppsService::new(
-            states.get_state::<SharedStateApp>().await.unwrap()
+            states.get_state::<SharedStateApp>().await.unwrap(),
+            states.get_state::<SharedManager>().await.unwrap(),
         );
 
         Box::new(service)
@@ -24,8 +26,8 @@ impl MonitoringAppsService {
         BuildMonitoringAppsService {}
     }
 
-    pub fn new(state: SharedStateApp) -> Self {
-        Self { state }
+    pub fn new(state: SharedStateApp, manager: SharedManager) -> Self {
+        Self { state, manager }
     }
 }
 
@@ -46,7 +48,7 @@ impl Service for MonitoringAppsService {
                 let remove_set: HashSet<_> = time_block.allow_apps.clone().into_iter().collect();
                 apps.retain(|x| !remove_set.contains(x));
 
-                get_manager().monitoring_apps(apps).await;
+                self.manager.monitoring_apps(apps).await;
             }
         }
     }

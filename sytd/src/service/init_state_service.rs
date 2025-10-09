@@ -1,15 +1,13 @@
-use std::collections::HashMap;
-use super::{ Service, BuildService, ServicePool };
+use super::{BuildService, Service, ServicePool};
 use crate::{
-    managers::{ Manager, get_manager },
-    models::User,
-    state_app::SharedStateApp,
-    storage::SharedStorage,
+    managers::SharedManager, models::User, state_app::SharedStateApp, storage::SharedStorage,
 };
+use std::collections::HashMap;
 
 pub struct InitStateService {
     state: SharedStateApp,
     storage: SharedStorage,
+    manager: SharedManager,
 }
 
 pub struct BuildInitStateService;
@@ -19,7 +17,8 @@ impl BuildService for BuildInitStateService {
     async fn build(&self, states: &ServicePool) -> Box<dyn Service + Send + Sync> {
         let service = InitStateService::new(
             states.get_state::<SharedStateApp>().await.unwrap(),
-            states.get_state::<SharedStorage>().await.unwrap()
+            states.get_state::<SharedStorage>().await.unwrap(),
+            states.get_state::<SharedManager>().await.unwrap(),
         );
 
         Box::new(service)
@@ -31,8 +30,12 @@ impl InitStateService {
         BuildInitStateService {}
     }
 
-    pub fn new(state: SharedStateApp, storage: SharedStorage) -> Self {
-        Self { state, storage }
+    pub fn new(state: SharedStateApp, storage: SharedStorage, manager: SharedManager) -> Self {
+        Self {
+            state,
+            storage,
+            manager,
+        }
     }
 
     async fn get_user_by_username(&self, username: String) -> Option<User> {
@@ -55,8 +58,7 @@ impl InitStateService {
 #[async_trait::async_trait]
 impl Service for InitStateService {
     async fn exec(&mut self) {
-        let manager = get_manager();
-        let system_user = manager.get_username().await.ok();
+        let system_user = self.manager.get_username().await.ok();
         let mut state = self.state.write().await;
 
         match (state.user.clone(), system_user) {
