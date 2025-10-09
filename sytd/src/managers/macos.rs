@@ -5,6 +5,7 @@ use std::path::PathBuf;
 use crate::utils::get_dir;
 pub struct MacOsManager {}
 
+#[async_trait::async_trait]
 impl Manager for MacOsManager {
     async fn monitoring_apps(&self, _apps: Vec<String>) {
         todo!()

@@ -3,7 +3,7 @@ mod macos;
 mod windows;
 
 // Tratis
-#[allow(dead_code)]
+#[async_trait::async_trait]
 pub trait Manager {
     async fn monitoring_apps(&self, apps: Vec<String>);
 

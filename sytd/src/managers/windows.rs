@@ -10,6 +10,7 @@ use super::Manager;
 
 pub struct WindowsManager {}
 
+#[async_trait::async_trait]
 impl Manager for WindowsManager {
     async fn monitoring_apps(&self, apps: Vec<String>) {
         let output = Command::new("tasklist").output().await.unwrap();

@@ -10,6 +10,7 @@ use super::Manager;
 
 pub struct LinuxManager {}
 
+#[async_trait::async_trait]
 impl Manager for LinuxManager {
     async fn monitoring_apps(&self, apps: Vec<String>) {
         let output = Command::new("top")
