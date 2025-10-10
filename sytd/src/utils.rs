@@ -1,4 +1,4 @@
-use crate::communication::Responses;
+use crate::{ communication::Responses, managers::SharedManager };
 use actix_web::{ HttpResponse, HttpResponseBuilder, http::StatusCode };
 
 pub fn get_dir() -> String {
@@ -54,4 +54,31 @@ pub fn converte_response_in_http(
     }
 
     HttpResponseBuilder::new(StatusCode::from_u16(status_code).unwrap()).json(body)
+}
+
+pub fn start_timeblock_notification(manager: &SharedManager, name: String, mensagem: String) {
+    let _ = manager.notification(
+        String::from("Start"),
+        name,
+        mensagem,
+        String::from("warning.png")
+    );
+}
+
+pub fn stop_timeblock_notification(manager: &SharedManager, name: String) {
+    let _ = manager.notification(
+        String::from("Start"),
+        name,
+        String::from(""),
+        String::from("warning.png")
+    );
+}
+
+pub fn pause_timeblock_notification(manager: &SharedManager, name: String) {
+    let _ = manager.notification(
+        String::from("Start"),
+        name,
+        String::from(""),
+        String::from("warning.png")
+    );
 }

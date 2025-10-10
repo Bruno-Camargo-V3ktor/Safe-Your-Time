@@ -84,6 +84,7 @@ impl Manager for WindowsManager {
                 .subtitle(&subtitle)
                 .body(&body)
                 .icon(&icon_path)
+                .appname("Safe your Time")
                 .show()
         });
 
