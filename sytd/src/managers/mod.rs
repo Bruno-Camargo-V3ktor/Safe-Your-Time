@@ -1,7 +1,11 @@
 use std::sync::Arc;
 
+#[cfg(target_os = "linux")]
 mod linux;
+#[cfg(target_os = "macos")]
 mod macos;
+
+#[cfg(target_os = "windows")]
 mod windows;
 
 pub type SharedManager = Arc<dyn Manager + Send + Sync>;
@@ -15,7 +19,13 @@ pub trait Manager {
 
     async fn get_username(&self) -> anyhow::Result<String>;
 
-    async fn notification(&self, title: String, body: String) -> anyhow::Result<()>;
+    fn notification(
+        &self,
+        title: String,
+        subtitle: String,
+        body: String,
+        icon: String
+    ) -> anyhow::Result<()>;
 }
 
 #[cfg(target_os = "windows")]
