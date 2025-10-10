@@ -67,7 +67,7 @@ pub fn start_timeblock_notification(manager: &SharedManager, name: String, mensa
 
 pub fn stop_timeblock_notification(manager: &SharedManager, name: String) {
     let _ = manager.notification(
-        String::from("Start"),
+        String::from("Completed"),
         name,
         String::from(""),
         String::from("warning.png")
@@ -76,7 +76,7 @@ pub fn stop_timeblock_notification(manager: &SharedManager, name: String) {
 
 pub fn pause_timeblock_notification(manager: &SharedManager, name: String) {
     let _ = manager.notification(
-        String::from("Start"),
+        String::from("Paused"),
         name,
         String::from(""),
         String::from("warning.png")
