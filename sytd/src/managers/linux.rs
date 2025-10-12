@@ -66,22 +66,28 @@ impl Manager for LinuxManager {
         Err(anyhow!("{:?}", String::from_utf8(output.stderr)))
     }
 
-    async fn notification(&self, title: String, body: String) -> anyhow::Result<()> {
+    fn notification(
+        &self,
+        title: String,
+        subtitle: String,
+        body: String,
+        icon: String,
+    ) -> anyhow::Result<()> {
         let current_dir = get_dir();
         let icon_path = PathBuf::from(current_dir)
-            .join("imgs/warning.png")
+            .join(format!("imgs/{}", icon))
             .to_string_lossy()
             .to_string();
 
         let _ = tokio::task::spawn_blocking(move || {
             Notification::new()
                 .summary(&title)
+                .subtitle(&subtitle)
                 .body(&body)
                 .icon(&icon_path)
-                .urgency(Urgency::Critical)
+                .appname("Safe your Time")
                 .show()
-        })
-        .await??;
+        });
 
         Ok(())
     }

@@ -3,7 +3,7 @@ use crate::{
     managers::get_manager,
     service::{
         InitStateService, ListenerHttpService, ListenerSocketService, MonitoringAppsService,
-        ServicePool, TimerService,
+        NotificationService, ServicePool, TimerService,
     },
     state_app::StateApp,
     storage::JsonStorage,
@@ -33,15 +33,10 @@ async fn main() {
 
     services.add_service(InitStateService::build(), 5000).await;
     services.add_service(TimerService::build(), 2500).await;
-    services
-        .add_service(MonitoringAppsService::build(), 5000)
-        .await;
-    services
-        .add_service(ListenerSocketService::build(), 10000)
-        .await;
-    services
-        .add_service(ListenerHttpService::build(), 10000)
-        .await;
+    services.add_service(NotificationService::build(), 3000).await;
+    services.add_service(MonitoringAppsService::build(), 5000).await;
+    services.add_service(ListenerSocketService::build(), 10000).await;
+    services.add_service(ListenerHttpService::build(), 10000).await;
 
     services.init().await;
 

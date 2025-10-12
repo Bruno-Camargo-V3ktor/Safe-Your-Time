@@ -1,4 +1,9 @@
-use std::{ any::{ Any, TypeId }, collections::HashMap, sync::Arc, time::Duration };
+use std::{
+    any::{Any, TypeId},
+    collections::HashMap,
+    sync::Arc,
+    time::Duration,
+};
 use tokio::sync::RwLock;
 
 //mod firewall_service;
@@ -6,6 +11,7 @@ mod init_state_service;
 mod listener_http_service;
 mod listener_socket_service;
 mod monitoring_apps_service;
+mod notification_service;
 mod timer_service;
 
 //pub use firewall_service::*;
@@ -13,6 +19,7 @@ pub use init_state_service::*;
 pub use listener_http_service::*;
 pub use listener_socket_service::*;
 pub use monitoring_apps_service::*;
+pub use notification_service::*;
 pub use timer_service::*;
 
 #[async_trait::async_trait]
@@ -32,26 +39,36 @@ pub struct ServicePool {
 
 impl ServicePool {
     pub fn new() -> Self {
-        Self { services: vec![], map_state: Arc::new(RwLock::new(HashMap::new())) }
+        Self {
+            services: vec![],
+            map_state: Arc::new(RwLock::new(HashMap::new())),
+        }
     }
 
     pub async fn add_service<S: BuildService + Send + Sync + 'static>(
         &mut self,
         build_service: S,
-        time: u64
+        time: u64,
     ) {
         let service = build_service.build(&self).await;
         self.services.push((service, Duration::from_millis(time)));
     }
 
-    pub async fn add_state<T>(&self, value: T) where T: 'static + Send + Sync + Clone {
+    pub async fn add_state<T>(&self, value: T)
+    where
+        T: 'static + Send + Sync + Clone,
+    {
         let mut write = self.map_state.write().await;
         write.insert(TypeId::of::<T>(), Box::new(value));
     }
 
-    pub async fn get_state<T>(&self) -> Option<T> where T: 'static + Send + Sync + Clone {
+    pub async fn get_state<T>(&self) -> Option<T>
+    where
+        T: 'static + Send + Sync + Clone,
+    {
         let read = self.map_state.read().await;
-        read.get(&TypeId::of::<T>()).and_then(|boxed_any| boxed_any.downcast_ref::<T>().cloned())
+        read.get(&TypeId::of::<T>())
+            .and_then(|boxed_any| boxed_any.downcast_ref::<T>().cloned())
     }
 
     pub async fn init(self) {
