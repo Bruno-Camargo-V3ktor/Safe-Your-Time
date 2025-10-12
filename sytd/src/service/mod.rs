@@ -74,13 +74,14 @@ impl ServicePool {
     pub async fn run(self) {
         let _ = tokio::spawn(async move {
             let pool = self;
-            let mut handlers: Vec<JoinHandle<()>> = vec![];
+            let mut handlers: Vec<Option<JoinHandle<()>>> = vec![];
+            pool.services.iter().for_each(|_| handlers.push(None));
 
             loop {
                 let services = &pool.services;
                 for i in 0..services.len() {
                     if let Some(handle) = handlers.get(i) {
-                        if !handle.is_finished() {
+                        if handle.is_some() && !handle.as_ref().unwrap().is_finished() {
                             continue;
                         }
                     }
@@ -88,17 +89,15 @@ impl ServicePool {
                     let (build_service, duration) = services.get(i).unwrap();
 
                     let mut service = build_service.build(&pool).await;
-                    let mut interval = tokio::time::interval(duration.clone());
+                    let sleep = tokio::time::sleep(duration.clone());
 
                     let h = tokio::spawn(async move {
-                        interval.tick().await;
                         service.exec().await;
+                        sleep.await;
                     });
 
-                    handlers.push(h);
+                    handlers[i] = Some(h);
                 }
-
-                tokio::time::interval(Duration::from_secs(1)).tick().await;
             }
         });
     }
