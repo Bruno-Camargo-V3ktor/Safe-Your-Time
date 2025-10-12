@@ -4,7 +4,7 @@ use std::{
     sync::Arc,
     time::Duration,
 };
-use tokio::sync::RwLock;
+use tokio::{sync::RwLock, task::JoinHandle};
 
 //mod firewall_service;
 mod init_state_service;
@@ -34,7 +34,7 @@ pub trait BuildService {
 
 pub struct ServicePool {
     map_state: Arc<RwLock<HashMap<TypeId, Box<dyn Any + Sync + Send>>>>,
-    services: Vec<(Box<dyn Service + Send + Sync>, Duration)>,
+    services: Vec<(Box<dyn BuildService + Send + Sync>, Duration)>,
 }
 
 impl ServicePool {
@@ -50,8 +50,8 @@ impl ServicePool {
         build_service: S,
         time: u64,
     ) {
-        let service = build_service.build(&self).await;
-        self.services.push((service, Duration::from_millis(time)));
+        self.services
+            .push((Box::new(build_service), Duration::from_millis(time)));
     }
 
     pub async fn add_state<T>(&self, value: T)
@@ -71,17 +71,35 @@ impl ServicePool {
             .and_then(|boxed_any| boxed_any.downcast_ref::<T>().cloned())
     }
 
-    pub async fn init(self) {
-        for (service, time) in self.services.into_iter() {
-            tokio::spawn(async move {
-                let mut interval = tokio::time::interval(time.clone());
-                let mut service = service;
+    pub async fn run(self) {
+        let _ = tokio::spawn(async move {
+            let pool = self;
+            let mut handlers: Vec<JoinHandle<()>> = vec![];
 
-                loop {
-                    interval.tick().await;
-                    service.exec().await;
+            loop {
+                let services = &pool.services;
+                for i in 0..services.len() {
+                    if let Some(handle) = handlers.get(i) {
+                        if !handle.is_finished() {
+                            continue;
+                        }
+                    }
+
+                    let (build_service, duration) = services.get(i).unwrap();
+
+                    let mut service = build_service.build(&pool).await;
+                    let mut interval = tokio::time::interval(duration.clone());
+
+                    let h = tokio::spawn(async move {
+                        interval.tick().await;
+                        service.exec().await;
+                    });
+
+                    handlers.push(h);
                 }
-            });
-        }
+
+                tokio::time::interval(Duration::from_secs(1)).tick().await;
+            }
+        });
     }
 }

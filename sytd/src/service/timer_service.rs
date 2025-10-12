@@ -1,11 +1,11 @@
-use super::{ BuildService, Service, ServicePool };
+use super::{BuildService, Service, ServicePool};
 use crate::{
     managers::SharedManager,
-    models::{ StateBlock, TimeRegister },
+    models::{StateBlock, TimeRegister},
     state_app::SharedStateApp,
-    utils::{ start_timeblock_notification, stop_timeblock_notification },
+    utils::{start_timeblock_notification, stop_timeblock_notification},
 };
-use chrono::{ Datelike, Local, Timelike };
+use chrono::{Datelike, Local, Timelike};
 
 pub struct TimerService {
     state: SharedStateApp,
@@ -19,7 +19,7 @@ impl BuildService for BuildTimerService {
     async fn build(&self, states: &ServicePool) -> Box<dyn Service + Send + Sync> {
         let service = TimerService::new(
             states.get_state::<SharedStateApp>().await.unwrap(),
-            states.get_state::<SharedManager>().await.unwrap()
+            states.get_state::<SharedManager>().await.unwrap(),
         );
 
         Box::new(service)
@@ -39,7 +39,7 @@ impl TimerService {
         &self,
         initiated: Vec<(String, Option<String>)>,
         finished: Vec<String>,
-        default_message: String
+        default_message: String,
     ) {
         for (name, message) in initiated {
             let message = message.unwrap_or(default_message.clone());
@@ -87,7 +87,8 @@ impl Service for TimerService {
         let user = state.user.as_ref().unwrap();
         let default_message = user.config.default_message.clone();
 
-        let time_blocks_for_day = user.blocks
+        let time_blocks_for_day = user
+            .blocks
             .iter()
             .filter(|(_, tb)| tb.days.contains(&weekday))
             .map(|(_, tb)| tb.clone())

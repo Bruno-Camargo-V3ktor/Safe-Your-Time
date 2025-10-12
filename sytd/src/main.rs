@@ -36,9 +36,9 @@ async fn main() {
     services.add_service(NotificationService::build(), 3000).await;
     services.add_service(MonitoringAppsService::build(), 5000).await;
     services.add_service(ListenerSocketService::build(), 10000).await;
-    services.add_service(ListenerHttpService::build(), 10000).await;
+    services.add_service(ListenerHttpService::build(), 10000).await;    
 
-    services.init().await;
+    services.run().await;
 
     shutdown_signal().await
 }
