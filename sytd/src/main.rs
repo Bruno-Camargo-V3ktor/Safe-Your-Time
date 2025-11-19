@@ -1,5 +1,5 @@
 use crate::{
-    communication::Controller,
+    listeners::Controller,
     managers::get_manager,
     service::{
         InitStateService, ListenerHttpService, ListenerSocketService, MonitoringAppsService,
@@ -10,7 +10,7 @@ use crate::{
     utils::{get_dir, shutdown_signal},
 };
 
-mod communication;
+mod listeners;
 mod managers;
 mod service;
 mod state_app;

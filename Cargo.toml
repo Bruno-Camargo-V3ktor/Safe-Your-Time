@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["sytd", "syt-cli", "syt-extension", "syt-web", "syt-models", "syt-communication"]
+members = ["sytd", "syt-extension", "syt-web", "syt-models", "syt-communication"]
 
 [workspace.dependencies]
 tokio = { version = "1.47", features = ["full"] }

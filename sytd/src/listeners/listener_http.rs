@@ -1,6 +1,6 @@
 use crate::utils::get_dir;
 use actix_files as fs;
-use super::super::{ Listener, controller::SharedController };
+use super::{SharedController, Listener};
 use actix_web::{ App, HttpServer, Responder, get, web };
 use super::routers::{
     create_time_block,

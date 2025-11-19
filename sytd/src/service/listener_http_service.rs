@@ -1,5 +1,5 @@
 use super::{BuildService, Service, ServicePool};
-use crate::communication::{Listener, ListenerHttp, SharedController};
+use crate::listeners::{Listener, ListenerHttp, SharedController};
 
 pub struct ListenerHttpService {
     controller: SharedController,

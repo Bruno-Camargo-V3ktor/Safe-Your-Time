@@ -1,5 +1,6 @@
-use crate::{ communication::Responses, managers::SharedManager };
+use crate::managers::SharedManager;
 use actix_web::{ HttpResponse, HttpResponseBuilder, http::StatusCode };
+use syt_communication::Responses;
 
 pub fn get_dir() -> String {
     std::env::current_exe().unwrap().parent().unwrap().to_str().unwrap().to_string()

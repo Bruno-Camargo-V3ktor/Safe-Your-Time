@@ -1,10 +1,10 @@
-use super::{Responses, commands::Commands};
+use syt_communication::{Responses, Commands};
+use syt_communication::{
+    CreateTimeBlockArgs, DeleteTimeBlockArgs, PauseTimeBlockArgs, ShowTimeBlockArgs,
+    StartTimeBlockArgs, StopTimeBlockArgs, UpdateConfigArgs, UpdateTimeBlockArgs,
+};
+
 use crate::{
-    communication::{
-        CreateTimeBlockArgs, DeleteTimeBlockArgs, PauseTimeBlockArgs, ShowTimeBlockArgs,
-        StartTimeBlockArgs, StopTimeBlockArgs, UpdateConfigArgs, UpdateTimeBlockArgs,
-    },
-    
     state_app::SharedStateApp,
     storage::SharedStorage,
 };

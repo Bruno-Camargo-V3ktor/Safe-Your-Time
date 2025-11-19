@@ -15,4 +15,5 @@ actix-web = "4"
 notify-rust = "4.11.7"
 actix-files = "0.6.8"
 syt-models = { path = "../syt-models" }
+syt-communication = { path = "../syt-communication" }
 #surrealdb = { version = "2.3.7", features = ["kv-rocksdb", "kv-mem"] }

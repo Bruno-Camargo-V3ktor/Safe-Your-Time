@@ -1,6 +1,6 @@
 use super::Listener;
-use super::commands;
 use super::controller::SharedController;
+use syt_communication::from_bytes;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
 pub struct ListenerSockter {
@@ -33,7 +33,7 @@ impl Listener for ListenerSockter {
 
             let mut buf = vec![0; 1024];
             let n = socket.read(&mut buf).await.unwrap();
-            let command = commands::from_bytes(&buf[..n]).await.unwrap();
+            let command = rom_bytes(&buf[..n]).await.unwrap();
             let response = controller.process(command).await;
 
             let _ = socket.write_all(&response.to_bytes()).await;
@@ -57,7 +57,7 @@ impl Listener for ListenerSockter {
 
             let mut buf = vec![0; 1024];
             if let Ok(n) = pipe.read(&mut buf).await {
-                let command = commands::from_bytes(&buf[..n]).await.unwrap();
+                let command = from_bytes(&buf[..n]).await.unwrap();
                 let response = controller.process(command).await;
                 let _ = pipe.write_all(&response.to_bytes()).await;
             }

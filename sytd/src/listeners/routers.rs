@@ -1,21 +1,18 @@
 use actix_web::{ HttpResponse, Responder, delete, get, patch, post, web };
 use serde::Deserialize;
 use serde_json::json;
-use crate::{
-    communication::{
+use crate::{listeners::SharedController, utils::converte_response_in_http};
+use syt_communication::{
         Commands,
         CreateTimeBlockArgs,
         DeleteTimeBlockArgs,
         PauseTimeBlockArgs,
         ResponseContent,
-        SharedController,
         ShowTimeBlockArgs,
         StartTimeBlockArgs,
         StopTimeBlockArgs,
         UpdateConfigArgs,
         UpdateTimeBlockArgs,
-    },
-    utils::converte_response_in_http,
 };
 
 #[derive(Deserialize)]
