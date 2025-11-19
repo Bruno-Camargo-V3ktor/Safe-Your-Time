@@ -1,7 +1,7 @@
 use chrono::Weekday;
 use serde::{Deserialize, Serialize};
 
-use crate::models::TimeRegister;
+use syt_models::TimeRegister;
 
 pub async fn from_bytes(bytes: &[u8]) -> anyhow::Result<Commands> {
     let command: Commands = serde_json::from_slice(bytes)?;

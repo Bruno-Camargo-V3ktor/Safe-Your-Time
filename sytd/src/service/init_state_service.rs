@@ -1,8 +1,9 @@
 use super::{BuildService, Service, ServicePool};
 use crate::{
-    managers::SharedManager, models::User, state_app::SharedStateApp, storage::SharedStorage,
+    managers::SharedManager, state_app::SharedStateApp, storage::SharedStorage,
 };
 use std::collections::HashMap;
+use syt_models::User;
 
 pub struct InitStateService {
     state: SharedStateApp,

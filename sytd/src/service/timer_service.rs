@@ -1,11 +1,11 @@
 use super::{BuildService, Service, ServicePool};
 use crate::{
     managers::SharedManager,
-    models::{StateBlock, TimeRegister},
     state_app::SharedStateApp,
     utils::{start_timeblock_notification, stop_timeblock_notification},
 };
 use chrono::{Datelike, Local, Timelike};
+use syt_models::{StateBlock, TimeRegister};
 
 pub struct TimerService {
     state: SharedStateApp,

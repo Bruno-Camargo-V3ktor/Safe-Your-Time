@@ -1,7 +1,7 @@
 use std::{ collections::HashMap, fs::{ self, File }, path::PathBuf, sync::Arc };
 use anyhow::Ok;
 use sha1::{ Digest, Sha1 };
-use crate::models::{ AppConfig, User };
+use syt_models::{ AppConfig, User };
 use super::{ SharedStorage, Storage };
 
 #[derive(Debug)]

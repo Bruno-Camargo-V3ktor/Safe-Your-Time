@@ -1,7 +1,8 @@
 use super::{BuildService, Service, ServicePool};
-use crate::{managers::SharedManager, models::StateBlock, state_app::SharedStateApp};
+use crate::{managers::SharedManager, state_app::SharedStateApp};
 use std::collections::HashSet;
 
+use syt_models::StateBlock;
 pub struct MonitoringAppsService {
     state: SharedStateApp,
     manager: SharedManager,

@@ -1,14 +1,11 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
+mod config;
+mod state_block;
+mod time_block;
+mod time_register;
+mod user;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
+pub use config::*;
+pub use state_block::*;
+pub use time_block::*;
+pub use time_register::*;
+pub use user::*;

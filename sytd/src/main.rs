@@ -12,7 +12,6 @@ use crate::{
 
 mod communication;
 mod managers;
-mod models;
 mod service;
 mod state_app;
 mod storage;

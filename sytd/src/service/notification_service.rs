@@ -1,6 +1,7 @@
 use super::{BuildService, Service, ServicePool};
-use crate::{managers::SharedManager, models::TimeBlock, state_app::SharedStateApp};
+use crate::{managers::SharedManager, state_app::SharedStateApp};
 use std::collections::HashMap;
+use syt_models::TimeBlock;
 
 pub struct NotificationService {
     state: SharedStateApp,

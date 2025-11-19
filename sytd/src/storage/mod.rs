@@ -1,5 +1,5 @@
 use std::sync::Arc;
-use crate::models::User;
+use syt_models::User;
 
 //mod surrealdb_storage;
 //pub use surrealdb_storage::*;

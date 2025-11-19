@@ -4963,6 +4963,10 @@ version = "0.1.0"
 [[package]]
 name = "syt-models"
 version = "0.1.0"
+dependencies = [
+ "chrono",
+ "serde",
+]
 
 [[package]]
 name = "syt-plugin-web"
@@ -4994,6 +4998,7 @@ dependencies = [
  "serde",
  "serde_json",
  "sha1",
+ "syt-models",
  "tokio",
 ]
 

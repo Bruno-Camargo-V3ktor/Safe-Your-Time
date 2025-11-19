@@ -4,10 +4,11 @@ use crate::{
         CreateTimeBlockArgs, DeleteTimeBlockArgs, PauseTimeBlockArgs, ShowTimeBlockArgs,
         StartTimeBlockArgs, StopTimeBlockArgs, UpdateConfigArgs, UpdateTimeBlockArgs,
     },
-    models::{StateBlock, TimeBlock, TimeRegister},
+    
     state_app::SharedStateApp,
     storage::SharedStorage,
 };
+use syt_models::{StateBlock, TimeBlock, TimeRegister};
 use chrono::{Duration, Local, Timelike};
 use serde_json::json;
 use std::sync::Arc;

@@ -1,4 +1,4 @@
-use crate::models::{TimeBlock, User};
+use syt_models::{TimeBlock, User};
 use std::{collections::HashMap, sync::Arc};
 use tokio::sync::RwLock;
 

@@ -14,4 +14,5 @@ sha1 = "0.10.6"
 actix-web = "4"
 notify-rust = "4.11.7"
 actix-files = "0.6.8"
+syt-models = { path = "../syt-models" }
 #surrealdb = { version = "2.3.7", features = ["kv-rocksdb", "kv-mem"] }
