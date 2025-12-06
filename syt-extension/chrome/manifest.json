@@ -2,8 +2,8 @@
   "manifest_version": 3,
   "name": "Safe your Time",
   "version": "1.0",
-  "description": "Extension for blocking pages synchronized with the Safe Your Time software.",
-  "permissions": ["storage"],
+  "description": "",
+  "permissions": ["storage", "declarativeNetRequest"],
   "host_permissions": ["<all_urls>"],
 
   
