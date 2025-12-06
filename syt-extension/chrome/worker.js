@@ -1,7 +1,7 @@
 const REDIRECT_URL = "http://localhost:4321/block";
 const API_URL = "http://localhost:4321";
 const UPDATE_TIME = 5000;
-let lastTimeBlocksJson = "";
+let lastTimeBlocksJson = JSON.stringify([]);
 
 function init() {
   setTimeout(async () => {
@@ -27,14 +27,17 @@ function init() {
 }
 
 async function request() {
-  //...
-  return [
-    {
-      name: "Sem Youtube",
-      message: "Foco garoto",
-      denied_acess: ["youtube.com"],
-    },
-  ];
+  try {
+    const response = await fetch(`${API_URL}/timeblock?actives=true`);
+
+    if (response.ok) {
+      return response.payload;
+    }
+  } catch (e) {
+    console.log(e);
+  }
+
+  return [];
 }
 
 function createRules(timeblocks) {
