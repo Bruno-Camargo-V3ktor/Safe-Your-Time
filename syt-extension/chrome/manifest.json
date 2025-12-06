@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Safe your Time",
   "version": "1.0",
-  "description": "",
+  "description": "Web blocking extension used in conjunction with Safe your Time software.",
   "permissions": ["storage", "declarativeNetRequest", "declarativeNetRequestWithHostAccess"],
   "host_permissions": ["<all_urls>"],
 

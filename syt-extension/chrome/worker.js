@@ -4,6 +4,12 @@ const UPDATE_TIME = 5000;
 let lastTimeBlocksJson = "";
 
 function init() {
+  setTimeout(async () => {
+    const oldRules = await chrome.declarativeNetRequest.getDynamicRules();
+    const oldRuleIds = oldRules.map((rule) => rule.id);
+    await updateDynamicRules(oldRuleIds, []);
+  }, 1000);
+
   setInterval(async () => {
     let newTimeBlocks = await request();
 
@@ -22,7 +28,13 @@ function init() {
 
 async function request() {
   //...
-  return [{ name: "", message: "", denied_acess: ["youtube.com"] }];
+  return [
+    {
+      name: "Sem Youtube",
+      message: "Foco garoto",
+      denied_acess: ["youtube.com"],
+    },
+  ];
 }
 
 function createRules(timeblocks) {
@@ -31,10 +43,19 @@ function createRules(timeblocks) {
 
   for (let i = 0; i < timeblocks.length; i++) {
     for (let j = 0; j < timeblocks[i].denied_acess.length; j++) {
+      const url = new URL(REDIRECT_URL);
+      url.searchParams.set("name", timeblocks[i].name);
+      url.searchParams.set("message", timeblocks[i].message);
+
       rules.push({
         id: id,
         priority: 1,
-        action: { type: "redirect", redirect: { url: REDIRECT_URL } },
+        action: {
+          type: "redirect",
+          redirect: {
+            url: `${url.toString()}`,
+          },
+        },
         condition: {
           urlFilter: `||${timeblocks[i].denied_acess[j]}^`,
           resourceTypes: ["main_frame"],
