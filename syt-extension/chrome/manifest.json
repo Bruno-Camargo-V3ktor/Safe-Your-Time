@@ -3,7 +3,7 @@
   "name": "Safe your Time",
   "version": "1.0",
   "description": "",
-  "permissions": ["storage", "declarativeNetRequest"],
+  "permissions": ["storage", "declarativeNetRequest", "declarativeNetRequestWithHostAccess"],
   "host_permissions": ["<all_urls>"],
 
   

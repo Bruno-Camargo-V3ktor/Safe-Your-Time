@@ -1,18 +1,17 @@
 const REDIRECT_URL = "http://localhost:4321/block";
 const API_URL = "http://localhost:4321";
 const UPDATE_TIME = 5000;
-const timeblocks = [];
+let lastTimeBlocksJson = "";
 
 function init() {
   setInterval(async () => {
     let newTimeBlocks = await request();
 
-    if (newTimeBlocks != timeblocks) {
-      newTimeBlocks.forEach((tb, index) => {
-        timeblocks[index] = tb;
-      });
+    const currentJson = JSON.stringify(newTimeBlocks);
+    if (currentJson != lastTimeBlocksJson) {
+      lastTimeBlocksJson = currentJson;
 
-      const newRules = createRules();
+      const newRules = createRules(newTimeBlocks);
       const oldRules = await chrome.declarativeNetRequest.getDynamicRules();
       const oldRuleIds = oldRules.map((rule) => rule.id);
 
@@ -26,7 +25,7 @@ async function request() {
   return [{ name: "", message: "", denied_acess: ["youtube.com"] }];
 }
 
-function createRules() {
+function createRules(timeblocks) {
   let rules = [];
   let id = 1;
 
@@ -37,7 +36,7 @@ function createRules() {
         priority: 1,
         action: { type: "redirect", redirect: { url: REDIRECT_URL } },
         condition: {
-          urlFilter: `https://youtube.com/*`,
+          urlFilter: `||${timeblocks[i].denied_acess[j]}^`,
           resourceTypes: ["main_frame"],
         },
       });
