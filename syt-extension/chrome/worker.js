@@ -8,6 +8,14 @@ function init() {
     const oldRules = await chrome.declarativeNetRequest.getDynamicRules();
     const oldRuleIds = oldRules.map((rule) => rule.id);
     await updateDynamicRules(oldRuleIds, []);
+
+    const alarm = await chrome.alarms.get("req-alarm");
+    if (!alarm) {
+      await chrome.alarms.create("req-alarm", {
+        periodInMinutes: 0.5,
+        delayInMinutes: 0.5,
+      });
+    }
   }, 1000);
 
   setInterval(async () => {
@@ -80,3 +88,8 @@ async function updateDynamicRules(oldIds, newRules) {
 }
 
 init();
+
+// Events
+chrome.alarms.onAlarm.addListener((alarm) => {
+  console.log(alarm);
+});
