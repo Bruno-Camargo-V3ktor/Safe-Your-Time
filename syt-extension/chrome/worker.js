@@ -2,6 +2,7 @@ const REDIRECT_URL = "http://localhost:4321/block";
 const API_URL = "http://localhost:4321";
 const UPDATE_TIME = 5000;
 let lastTimeBlocksJson = JSON.stringify([]);
+let blockUrls = [];
 
 function init() {
   setTimeout(async () => {
@@ -30,6 +31,21 @@ function init() {
       const oldRuleIds = oldRules.map((rule) => rule.id);
 
       await updateDynamicRules(oldRuleIds, newRules);
+      blockUrls = getBlockUrls(newTimeBlocks);
+    }
+
+    let queryOptions = { active: true, lastFocusedWindow: true };
+    let [tab] = await chrome.tabs.query(queryOptions);
+
+    if (tab && tab.url) {
+      for (let i = 0; i < blockUrls.length; i++) {
+        const url = blockUrls[i].toLowerCase();
+        const completeUrl = tab.url.toLowerCase();
+
+        if (completeUrl.includes(url)) {
+          await chrome.tabs.reload(tab.id);
+        }
+      }
     }
   }, UPDATE_TIME);
 }
@@ -87,9 +103,21 @@ async function updateDynamicRules(oldIds, newRules) {
   });
 }
 
+function getBlockUrls(tbs) {
+  const urls = [];
+
+  for (let i = 0; i < tbs.length; i++) {
+    for (let j = 0; j < tbs[i].denied_acess.length; j++) {
+      urls.push(tbs[i].denied_acess[j]);
+    }
+  }
+
+  return urls;
+}
+
 init();
 
 // Events
 chrome.alarms.onAlarm.addListener((alarm) => {
-  console.log(alarm);
+  //console.log(alarm);
 });
